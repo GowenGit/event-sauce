@@ -1,0 +1,31 @@
+name: Master Build
+
+on: 
+  push:
+    branches:
+      - master
+
+jobs:
+  run-tests:
+    name: Testing
+
+    runs-on: ubuntu-20.04
+    services:
+      mysql:
+        image: postgres:13.2
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: sauce
+        ports:
+        - 5433:5432
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.203'
+
+    - name: Run dotnet tests
+      run: dotnet test

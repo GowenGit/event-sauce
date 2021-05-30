@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EventSauce.Extensions.Microsoft.DependencyInjection\EventSauce.Extensions.Microsoft.DependencyInjection.csproj" />
     <ProjectReference Include="..\EventSauce\EventSauce.csproj" />
   </ItemGroup>
 

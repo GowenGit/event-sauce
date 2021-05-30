@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace EventSauce.Core
+namespace EventSauce
 {
     [Serializable]
     public class EventSauceRepositoryException : Exception

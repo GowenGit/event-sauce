@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
+using System.Runtime.CompilerServices;
 
-namespace EventSauce.Core
+[assembly: InternalsVisibleTo("EventSauce.Tests")]
+
+namespace EventSauce
 {
     public abstract class SaucyAggregate
     {
@@ -90,16 +92,12 @@ namespace EventSauce.Core
 
     public abstract record SaucyEvent
     {
-        [JsonIgnore]
         public Guid EventId { get; init; } = Guid.NewGuid();
 
-        [JsonIgnore]
         public DateTime Created { get; init; } = DateTime.UtcNow;
 
-        [JsonIgnore]
         public SaucyAggregateId? AggregateId { get; init; }
 
-        [JsonIgnore]
         public long AggregateVersion { get; init; }
     }
 }

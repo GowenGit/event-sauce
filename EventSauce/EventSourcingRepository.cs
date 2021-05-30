@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace EventSauce.Core
+namespace EventSauce
 {
     public interface ISaucyRepository
     {
@@ -13,7 +13,7 @@ namespace EventSauce.Core
             where TAggregate : SaucyAggregate;
     }
 
-    internal class SaucyRepository : ISaucyRepository
+    public class SaucyRepository : ISaucyRepository
     {
         private readonly ISauceStore _sauceStore;
         private readonly ISaucyBus _eventBus;

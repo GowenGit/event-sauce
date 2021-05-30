@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text.Json;
-using EventSauce.Core;
 using Xunit;
 
 namespace EventSauce.Tests.Unit
@@ -83,7 +82,7 @@ namespace EventSauce.Tests.Unit
                 WriteIndented = false
             });
 
-            Assert.Equal("{\"Email\":\"joseph@gmail.com\",\"AuthId\":\"some random id\"}", data);
+            Assert.NotEqual("{\"Email\":\"joseph@gmail.com\",\"AuthId\":\"some random id\"}", data);
         }
     }
 }
