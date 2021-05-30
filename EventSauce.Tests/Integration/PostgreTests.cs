@@ -1,32 +1,63 @@
 ﻿using EventSauce.Extensions.Microsoft.DependencyInjection;
+using EventSauce.Postgre;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using EventSauce.Postgre;
 using Xunit;
+
+#pragma warning disable CA1711
 
 namespace EventSauce.Tests.Integration
 {
-    public class PostgreTests
+    public sealed class PostgreStorageFixture : IDisposable
     {
-        public static ISaucyRepository GetSutObject()
+        private readonly ServiceProvider _provider;
+
+        public PostgreStorageFixture()
         {
             var services = new ServiceCollection();
+
+            const string connectionString =
+                "Server=localhost;Port=5433;Database=sauce;User Id=postgres;Password=password;";
 
             services.AddEventSauce(options =>
             {
                 var factory = new PostgreSauceStoreFactory(
-                    new[] {typeof(PostgreTests).Assembly},
-                    "Server=localhost;Port=5433;Database=sauce;User Id=postgres;Password=password;",
-                    "sauce_jar");
+                    new[]
+                    {
+                        typeof(PostgreTests).Assembly
+                    },
+                    connectionString);
 
-                options.Store = x => factory.Create();
+                options.Store = _ => factory.Create();
             });
 
-            var provider = services.BuildServiceProvider();
+            _provider = services.BuildServiceProvider();
+        }
 
-            return provider.GetService<ISaucyRepository>() ?? throw new ArgumentNullException(nameof(ISaucyRepository));
+        public ISaucyRepository GetSutObject()
+        {
+            return _provider.GetService<ISaucyRepository>() ?? throw new ArgumentNullException(nameof(ISaucyRepository));
+        }
+
+        public void Dispose()
+        {
+            _provider.Dispose();
+        }
+    }
+
+    [CollectionDefinition("PostgreSql storage collection")]
+    public class PostgreStorageCollection : ICollectionFixture<PostgreStorageFixture> { }
+
+    [Collection("PostgreSql storage collection")]
+    public class PostgreTests
+    {
+        private readonly PostgreStorageFixture _fixture;
+
+        public PostgreTests(PostgreStorageFixture fixture)
+        {
+            _fixture = fixture;
         }
 
         [Fact]
@@ -43,7 +74,7 @@ namespace EventSauce.Tests.Integration
 
             user.ChangeEmail(newEmail);
 
-            var sut = GetSutObject();
+            var sut = _fixture.GetSutObject();
 
             await sut.Save(user);
 
@@ -66,7 +97,7 @@ namespace EventSauce.Tests.Integration
 
             var user = new UserAggregate(userId, email, auth);
 
-            var sut = GetSutObject();
+            var sut = _fixture.GetSutObject();
 
             var repoUser = await sut.GetById<UserAggregate>(userId);
 
@@ -97,7 +128,7 @@ namespace EventSauce.Tests.Integration
 
             user.ChangeEmail(newEmail);
 
-            var sut = GetSutObject();
+            var sut = _fixture.GetSutObject();
 
             var repoUser = await sut.GetById<UserAggregate>(userId);
 

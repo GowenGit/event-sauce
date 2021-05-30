@@ -13,8 +13,12 @@ namespace EventSauce.Postgre
         private readonly string _connectionString;
         private readonly string _tableName;
 
-        private readonly List<Type> _eventTypes = new ();
-        private readonly List<Type> _aggregateTypes = new ();
+        private readonly Dictionary<string, Type> _eventTypes = new ();
+        private readonly Dictionary<string, Type> _aggregateTypes = new ();
+
+        public PostgreSauceStoreFactory(
+            Assembly[] assemblies,
+            string connectionString) : this(assemblies, connectionString, "saucy_events") {}
 
         public PostgreSauceStoreFactory(
             Assembly[] assemblies,
@@ -57,19 +61,19 @@ namespace EventSauce.Postgre
                     {
                         if (type.IsSubclassOf(typeof(SaucyEvent)))
                         {
-                            _eventTypes.Add(type);
+                            _eventTypes.Add(type.Name, type);
                         }
 
                         if (type.IsSubclassOf(typeof(SaucyAggregateId)))
                         {
-                            _aggregateTypes.Add(type);
+                            _aggregateTypes.Add(type.Name, type);
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new EventSaucePostgreException("Failed to setup necessary tables", ex);
+                throw new EventSaucePostgreException("Failed to register events and saucy aggregates", ex);
             }
         }
 

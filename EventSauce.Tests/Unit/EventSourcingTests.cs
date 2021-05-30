@@ -6,21 +6,21 @@ namespace EventSauce.Tests.Unit
 {
     public class EventSourcingTests
     {
-        internal record UserCreatedEvent : SaucyEvent
+        internal record UnitUserCreatedEvent : SaucyEvent
         {
             public string Email { get; init; } = string.Empty;
 
             public string AuthId { get; init; } = string.Empty;
         }
 
-        internal record User : SaucyAggregateId
+        internal record UnitUser : SaucyAggregateId
         {
-            public User(Guid id)
+            public UnitUser(Guid id)
             {
                 Id = id;
             }
 
-            public static User NewUser()
+            public static UnitUser NewUser()
             {
                 return new (Guid.NewGuid());
             }
@@ -31,9 +31,9 @@ namespace EventSauce.Tests.Unit
         {
             var guid = Guid.NewGuid();
 
-            var idOne = new User(guid);
+            var idOne = new UnitUser(guid);
 
-            var idTwo = new User(guid);
+            var idTwo = new UnitUser(guid);
 
             Assert.Equal(idOne, idTwo);
 
@@ -48,17 +48,17 @@ namespace EventSauce.Tests.Unit
         [Fact]
         public void DomainEvents_ShouldBeCompared_BasedOnProperties()
         {
-            var eventOne = new UserCreatedEvent
+            var eventOne = new UnitUserCreatedEvent
             {
                 Email = "joseph@gmail.com",
-                AggregateId = User.NewUser(),
+                AggregateId = UnitUser.NewUser(),
                 AggregateVersion = 1
             };
 
             var eventTwo = eventOne with
             {
                 Email = "adolf@gmail.com",
-                AggregateId = User.NewUser(),
+                AggregateId = UnitUser.NewUser(),
                 AggregateVersion = 2
             };
 
@@ -68,10 +68,10 @@ namespace EventSauce.Tests.Unit
         [Fact]
         public void DomainEvents_ShouldBeSerialized_WithoutBaseProperties()
         {
-            var domainEvent = new UserCreatedEvent
+            var domainEvent = new UnitUserCreatedEvent
             {
                 Email = "joseph@gmail.com",
-                AggregateId = User.NewUser(),
+                AggregateId = UnitUser.NewUser(),
                 AggregateVersion = 1,
                 AuthId = "some random id"
             };

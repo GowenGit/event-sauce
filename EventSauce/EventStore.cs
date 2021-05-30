@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace EventSauce
 {
-    public interface ISauceStore
+    public interface ISauceStore : IDisposable
     {
         Task<IEnumerable<SaucyEvent>> ReadEvents(SaucyAggregateId id);
 
@@ -24,7 +25,7 @@ namespace EventSauce
         }
     }
 
-    public class InMemorySauceStore : ISauceStore
+    public sealed class InMemorySauceStore : ISauceStore
     {
         private static readonly List<SaucyEvent> Sauces = new ();
 
@@ -39,5 +40,7 @@ namespace EventSauce
 
             return Task.CompletedTask;
         }
+
+        public void Dispose() { }
     }
 }

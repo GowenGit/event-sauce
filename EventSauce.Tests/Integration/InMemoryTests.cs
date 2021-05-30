@@ -5,21 +5,47 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
+#pragma warning disable CA1711
+
 namespace EventSauce.Tests.Integration
 {
-    public class InMemoryTests
+    public sealed class InMemoryStorageFixture : IDisposable
     {
-        private static DateTime PastDate() => DateTime.UtcNow.AddMinutes(-10);
+        private readonly ServiceProvider _provider;
 
-        public static ISaucyRepository GetSutObject()
+        public InMemoryStorageFixture()
         {
             var services = new ServiceCollection();
 
             services.AddEventSauce();
 
-            var provider = services.BuildServiceProvider();
+            _provider = services.BuildServiceProvider();
+        }
 
-            return provider.GetService<ISaucyRepository>() ?? throw new ArgumentNullException(nameof(ISaucyRepository));
+        public ISaucyRepository GetSutObject()
+        {
+            return _provider.GetService<ISaucyRepository>() ?? throw new ArgumentNullException(nameof(ISaucyRepository));
+        }
+
+        public void Dispose()
+        {
+            _provider.Dispose();
+        }
+    }
+
+    [CollectionDefinition("InMemory storage collection")]
+    public class InMemoryStorageCollection : ICollectionFixture<InMemoryStorageFixture> { }
+
+    [Collection("InMemory storage collection")]
+    public class InMemoryTests
+    {
+        private static DateTime PastDate() => DateTime.UtcNow.AddMinutes(-10);
+
+        private readonly InMemoryStorageFixture _fixture;
+
+        public InMemoryTests(InMemoryStorageFixture fixture)
+        {
+            _fixture = fixture;
         }
 
         [Fact]
@@ -113,7 +139,7 @@ namespace EventSauce.Tests.Integration
 
             user.ChangeEmail(newEmail);
 
-            var sut = GetSutObject();
+            var sut = _fixture.GetSutObject();
 
             await sut.Save(user);
 
@@ -136,7 +162,7 @@ namespace EventSauce.Tests.Integration
 
             var user = new UserAggregate(userId, email, auth);
 
-            var sut = GetSutObject();
+            var sut = _fixture.GetSutObject();
 
             var repoUser = await sut.GetById<UserAggregate>(userId);
 
@@ -167,7 +193,7 @@ namespace EventSauce.Tests.Integration
 
             user.ChangeEmail(newEmail);
 
-            var sut = GetSutObject();
+            var sut = _fixture.GetSutObject();
 
             var repoUser = await sut.GetById<UserAggregate>(userId);
 
