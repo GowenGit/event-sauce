@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 [assembly: InternalsVisibleTo("EventSauce.Tests")]
 
@@ -60,7 +61,7 @@ namespace EventSauce
         {
             var aggregateId = Id ?? saucyEvent.AggregateId;
 
-            if (aggregateId == null || string.IsNullOrEmpty(aggregateId.Kind) || aggregateId.Id == Guid.Empty)
+            if (aggregateId == null || string.IsNullOrEmpty(aggregateId.IdType) || aggregateId.Id == Guid.Empty)
             {
                 throw new EventSauceException($"Aggregate ID {aggregateId} is not valid");
             }
@@ -80,24 +81,28 @@ namespace EventSauce
 
     public abstract record SaucyAggregateId
     {
-        public string Kind { get; init; } = string.Empty;
+        public string IdType => GetType().Name;
 
         public Guid Id { get; init; }
 
         public override string ToString()
         {
-            return $"[{Kind}|{Id}]";
+            return $"[{IdType}|{Id}]";
         }
     }
 
     public abstract record SaucyEvent
     {
+        [JsonIgnore]
         public Guid EventId { get; init; } = Guid.NewGuid();
 
+        [JsonIgnore]
         public DateTime Created { get; init; } = DateTime.UtcNow;
 
+        [JsonIgnore]
         public SaucyAggregateId? AggregateId { get; init; }
 
+        [JsonIgnore]
         public long AggregateVersion { get; init; }
     }
 }

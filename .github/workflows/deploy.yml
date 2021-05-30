@@ -30,3 +30,6 @@ jobs:
 
     - name: Deploy NuGet Extension Binaries
       run: dotnet nuget push out/EventSauce.Extensions.Microsoft.DependencyInjection.${{ steps.vars.outputs.tag }}.nupkg -k ${{ secrets.CICD_KEY }} -s https://api.nuget.org/v3/index.json
+
+    - name: Deploy NuGet Postgre Binaries
+      run: dotnet nuget push out/EventSauce.Postgre.${{ steps.vars.outputs.tag }}.nupkg -k ${{ secrets.CICD_KEY }} -s https://api.nuget.org/v3/index.json

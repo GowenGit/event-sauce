@@ -25,12 +25,12 @@ namespace EventSauce.Tests.Integration
         [Fact]
         public void Aggregate_WhenCreated_ShouldHaveOneEvent()
         {
-            var userId = UserId.NewUser();
+            var userId = User.NewUser();
 
             const string? email = "origina@gmail.com";
             const string? auth = "auth_id";
 
-            var user = new User(userId, email, auth);
+            var user = new UserAggregate(userId, email, auth);
 
             var events = user.GetUncommittedEvents().ToList();
 
@@ -56,12 +56,12 @@ namespace EventSauce.Tests.Integration
         [Fact]
         public void Aggregate_WhenCreatedAndEmailChanged_ShouldHaveTwoEvents()
         {
-            var userId = UserId.NewUser();
+            var userId = User.NewUser();
 
             const string? email = "origina@gmail.com";
             const string? auth = "auth_id";
 
-            var user = new User(userId, email, auth);
+            var user = new UserAggregate(userId, email, auth);
 
             const string newEmail = "changed@gmail.com";
 
@@ -102,12 +102,12 @@ namespace EventSauce.Tests.Integration
         [Fact]
         public async Task Aggregate_WhenCreatedAndSaved_ShouldHaveNoUncommittedEvents()
         {
-            var userId = UserId.NewUser();
+            var userId = User.NewUser();
 
             const string? email = "origina@gmail.com";
             const string? auth = "auth_id";
 
-            var user = new User(userId, email, auth);
+            var user = new UserAggregate(userId, email, auth);
 
             const string newEmail = "changed@gmail.com";
 
@@ -129,22 +129,22 @@ namespace EventSauce.Tests.Integration
         [Fact]
         public async Task Aggregate_WhenCreatedAndSaved_ShouldRetrieve()
         {
-            var userId = UserId.NewUser();
+            var userId = User.NewUser();
 
             const string? email = "origina@gmail.com";
             const string? auth = "auth_id";
 
-            var user = new User(userId, email, auth);
+            var user = new UserAggregate(userId, email, auth);
 
             var sut = GetSutObject();
 
-            var repoUser = await sut.GetById<User>(userId);
+            var repoUser = await sut.GetById<UserAggregate>(userId);
 
             Assert.Null(repoUser);
 
             await sut.Save(user);
 
-            repoUser = await sut.GetById<User>(userId);
+            repoUser = await sut.GetById<UserAggregate>(userId);
 
             Assert.NotNull(repoUser);
 
@@ -156,12 +156,12 @@ namespace EventSauce.Tests.Integration
         [Fact]
         public async Task Aggregate_WhenCreatedChangedAndSaved_ShouldRetrieve()
         {
-            var userId = UserId.NewUser();
+            var userId = User.NewUser();
 
             const string? email = "origina@gmail.com";
             const string? auth = "auth_id";
 
-            var user = new User(userId, email, auth);
+            var user = new UserAggregate(userId, email, auth);
 
             const string newEmail = "changed@gmail.com";
 
@@ -169,13 +169,13 @@ namespace EventSauce.Tests.Integration
 
             var sut = GetSutObject();
 
-            var repoUser = await sut.GetById<User>(userId);
+            var repoUser = await sut.GetById<UserAggregate>(userId);
 
             Assert.Null(repoUser);
 
             await sut.Save(user);
 
-            repoUser = await sut.GetById<User>(userId);
+            repoUser = await sut.GetById<UserAggregate>(userId);
 
             Assert.NotNull(repoUser);
 

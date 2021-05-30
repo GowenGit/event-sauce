@@ -27,6 +27,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Npgsql" Version="5.0.5" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="Obsessive.Defender" Version="1.0.1">
       <PrivateAssets>all</PrivateAssets>
@@ -35,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="../assets/icon.png" Pack="true" PackagePath="\" />
+    <ProjectReference Include="..\EventSauce\EventSauce.csproj" />
   </ItemGroup>
 
 </Project>

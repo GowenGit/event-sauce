@@ -13,15 +13,14 @@ namespace EventSauce.Tests.Unit
             public string AuthId { get; init; } = string.Empty;
         }
 
-        internal record UserId : SaucyAggregateId
+        internal record User : SaucyAggregateId
         {
-            public UserId(Guid id)
+            public User(Guid id)
             {
-                Kind = "User";
                 Id = id;
             }
 
-            public static UserId NewUser()
+            public static User NewUser()
             {
                 return new (Guid.NewGuid());
             }
@@ -32,9 +31,9 @@ namespace EventSauce.Tests.Unit
         {
             var guid = Guid.NewGuid();
 
-            var idOne = new UserId(guid);
+            var idOne = new User(guid);
 
-            var idTwo = new UserId(guid);
+            var idTwo = new User(guid);
 
             Assert.Equal(idOne, idTwo);
 
@@ -52,14 +51,14 @@ namespace EventSauce.Tests.Unit
             var eventOne = new UserCreatedEvent
             {
                 Email = "joseph@gmail.com",
-                AggregateId = UserId.NewUser(),
+                AggregateId = User.NewUser(),
                 AggregateVersion = 1
             };
 
             var eventTwo = eventOne with
             {
                 Email = "adolf@gmail.com",
-                AggregateId = UserId.NewUser(),
+                AggregateId = User.NewUser(),
                 AggregateVersion = 2
             };
 
@@ -72,7 +71,7 @@ namespace EventSauce.Tests.Unit
             var domainEvent = new UserCreatedEvent
             {
                 Email = "joseph@gmail.com",
-                AggregateId = UserId.NewUser(),
+                AggregateId = User.NewUser(),
                 AggregateVersion = 1,
                 AuthId = "some random id"
             };
@@ -82,7 +81,7 @@ namespace EventSauce.Tests.Unit
                 WriteIndented = false
             });
 
-            Assert.NotEqual("{\"Email\":\"joseph@gmail.com\",\"AuthId\":\"some random id\"}", data);
+            Assert.Equal("{\"Email\":\"joseph@gmail.com\",\"AuthId\":\"some random id\"}", data);
         }
     }
 }

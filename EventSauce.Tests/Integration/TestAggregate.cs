@@ -2,13 +2,13 @@
 
 namespace EventSauce.Tests.Integration
 {
-    public class User : SaucyAggregate
+    public class UserAggregate : SaucyAggregate
     {
-        private User() { }
+        private UserAggregate() { }
 
         public string Email { get; private set; } = string.Empty;
 
-        public User(UserId id, string email, string authId)
+        public UserAggregate(User id, string email, string authId)
         {
             IssueEvent(new UserCreatedEvent
             {
@@ -49,15 +49,14 @@ namespace EventSauce.Tests.Integration
         public string Email { get; init; } = string.Empty;
     }
 
-    public record UserId : SaucyAggregateId
+    public record User : SaucyAggregateId
     {
-        public UserId(Guid id)
+        public User(Guid id)
         {
-            Kind = "User";
             Id = id;
         }
 
-        public static UserId NewUser()
+        public static User NewUser()
         {
             return new (Guid.NewGuid());
         }
