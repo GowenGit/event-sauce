@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Npgsql;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Npgsql;
 
 #pragma warning disable CA2100
 
@@ -14,6 +14,7 @@ namespace EventSauce.Postgre
         private readonly string _tableName;
 
         private readonly List<Type> _eventTypes = new ();
+        private readonly List<Type> _aggregateTypes = new ();
 
         public PostgreSauceStoreFactory(
             Assembly[] assemblies,
@@ -40,9 +41,9 @@ namespace EventSauce.Postgre
 
                 command.ExecuteNonQuery();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new EventSaucePostgreException("Failed to setup necessary tables", e);
+                throw new EventSaucePostgreException("Failed to setup necessary tables", ex);
             }
         }
 
@@ -58,12 +59,17 @@ namespace EventSauce.Postgre
                         {
                             _eventTypes.Add(type);
                         }
+
+                        if (type.IsSubclassOf(typeof(SaucyAggregateId)))
+                        {
+                            _aggregateTypes.Add(type);
+                        }
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new EventSaucePostgreException("Failed to setup necessary tables", e);
+                throw new EventSaucePostgreException("Failed to setup necessary tables", ex);
             }
         }
 
@@ -73,11 +79,11 @@ namespace EventSauce.Postgre
             {
                 var connection = CreateConnection();
 
-                return new PostgreSauceStore(connection, _tableName, _eventTypes);
+                return new PostgreSauceStore(connection, _tableName, _eventTypes, _aggregateTypes);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new EventSaucePostgreException("Failed to create PostgreSauceStore", e);
+                throw new EventSaucePostgreException("Failed to create PostgreSauceStore", ex);
             }
         }
 

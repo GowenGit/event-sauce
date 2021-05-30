@@ -104,5 +104,10 @@ namespace EventSauce
 
         [JsonIgnore]
         public long AggregateVersion { get; init; }
+
+        public override string ToString()
+        {
+            return $"[{EventId}| Aggregate: {AggregateId} | Version: {AggregateVersion}]";
+        }
     }
 }
