@@ -26,6 +26,12 @@ namespace EventSauce.Tests.Integration
             });
         }
 
+        /// <summary>
+        /// Apply events need to be defined
+        /// for each applicable event since this is
+        /// how data is loaded back to the aggregate when
+        /// reading from the database.
+        /// </summary>
         public void Apply(UserCreatedEvent domainEvent)
         {
             Email = domainEvent.Email;
