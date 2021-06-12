@@ -9,7 +9,7 @@ namespace EventSauce
     {
         Task<IEnumerable<SaucyEvent>> ReadEvents(SaucyAggregateId id);
 
-        Task AppendEvent(SaucyEvent sourceEvent);
+        Task AppendEvent(SaucyEvent sourceEvent, SaucyAggregateId? performedBy);
     }
 
     public interface ISaucyBus
@@ -34,7 +34,7 @@ namespace EventSauce
             return Task.FromResult(Sauces.Where(x => x.AggregateId == id));
         }
 
-        public Task AppendEvent(SaucyEvent sourceEvent)
+        public Task AppendEvent(SaucyEvent sourceEvent, SaucyAggregateId? performedBy)
         {
             Sauces.Add(sourceEvent);
 

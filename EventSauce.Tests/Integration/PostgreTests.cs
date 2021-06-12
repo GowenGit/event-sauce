@@ -144,5 +144,36 @@ namespace EventSauce.Tests.Integration
             Assert.Equal(newEmail, repoUser?.Email);
             Assert.Equal(1, repoUser?.Version);
         }
+
+        [Fact]
+        public async Task Aggregate_WhenCreatedChangedAndSavedWithPerformedBy_ShouldRetrieve()
+        {
+            var userId = User.NewUser();
+
+            const string? email = "origina@gmail.com";
+            const string? auth = "auth_id";
+
+            var user = new UserAggregate(userId, email, auth);
+
+            const string newEmail = "changed@gmail.com";
+
+            user.ChangeEmail(newEmail);
+
+            var sut = _fixture.GetSutObject();
+
+            var repoUser = await sut.GetById<UserAggregate>(userId);
+
+            Assert.Null(repoUser);
+
+            await sut.Save(user, userId);
+
+            repoUser = await sut.GetById<UserAggregate>(userId);
+
+            Assert.NotNull(repoUser);
+
+            Assert.Equal(userId, repoUser?.Id);
+            Assert.Equal(newEmail, repoUser?.Email);
+            Assert.Equal(1, repoUser?.Version);
+        }
     }
 }

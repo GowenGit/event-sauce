@@ -9,7 +9,7 @@ namespace EventSauce
         Task<TAggregate?> GetById<TAggregate>(SaucyAggregateId id)
             where TAggregate : SaucyAggregate;
 
-        Task Save<TAggregate>(TAggregate aggregate)
+        Task Save<TAggregate>(TAggregate aggregate, SaucyAggregateId? performedBy = null)
             where TAggregate : SaucyAggregate;
     }
 
@@ -50,14 +50,14 @@ namespace EventSauce
             }
         }
 
-        public async Task Save<TAggregate>(TAggregate aggregate)
+        public async Task Save<TAggregate>(TAggregate aggregate, SaucyAggregateId? performedBy = null)
             where TAggregate : SaucyAggregate
         {
             try
             {
                 foreach (var domainEvent in aggregate.GetUncommittedEvents())
                 {
-                    await _sauceStore.AppendEvent(domainEvent);
+                    await _sauceStore.AppendEvent(domainEvent, performedBy);
                     await _eventBus.Publish(domainEvent);
                 }
 

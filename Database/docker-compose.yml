@@ -1,6 +1,6 @@
 version: '3'
 services:
-  event_saauce_db:
+  event_sauce_db:
     image: postgres:13.2
     restart: always
     environment:

@@ -91,7 +91,7 @@ namespace EventSauce.Postgre
             }
         }
 
-        public async Task AppendEvent(SaucyEvent sourceEvent)
+        public async Task AppendEvent(SaucyEvent sourceEvent, SaucyAggregateId? performedBy)
         {
             try
             {
@@ -113,6 +113,7 @@ namespace EventSauce.Postgre
                 command.Parameters.AddWithValue("event_id", sourceEvent.EventId);
                 command.Parameters.AddWithValue("event_type", eventType);
                 command.Parameters.AddWithValue("event_data", NpgsqlDbType.Jsonb, eventData);
+                command.Parameters.AddWithValue("performed_by", performedBy?.Id ?? Guid.Empty);
 
                 await command.ExecuteNonQueryAsync();
             }
