@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.Json;
 
 #pragma warning disable CA2100
 
@@ -10,6 +11,7 @@ namespace EventSauce.Postgre
     public class PostgreSauceStoreFactory
     {
         private readonly Assembly[] _assemblies;
+        private readonly JsonSerializerOptions _options;
         private readonly string _connectionString;
         private readonly string _tableName;
 
@@ -18,14 +20,17 @@ namespace EventSauce.Postgre
 
         public PostgreSauceStoreFactory(
             Assembly[] assemblies,
-            string connectionString) : this(assemblies, connectionString, "saucy_events") {}
+            JsonSerializerOptions options,
+            string connectionString) : this(assemblies, options, connectionString, "saucy_events") {}
 
         public PostgreSauceStoreFactory(
             Assembly[] assemblies,
+            JsonSerializerOptions options,
             string connectionString,
             string tableName)
         {
             _assemblies = assemblies;
+            _options = options;
             _connectionString = connectionString;
             _tableName = tableName;
 
@@ -83,7 +88,7 @@ namespace EventSauce.Postgre
             {
                 var connection = CreateConnection();
 
-                return new PostgreSauceStore(connection, _tableName, _eventTypes, _aggregateTypes);
+                return new PostgreSauceStore(connection, _tableName, _eventTypes, _aggregateTypes, _options);
             }
             catch (Exception ex)
             {

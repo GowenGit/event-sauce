@@ -17,16 +17,20 @@ namespace EventSauce.Postgre
         private readonly Dictionary<string, Type> _eventTypes;
         private readonly Dictionary<string, Type> _aggregateTypes;
 
+        private readonly JsonSerializerOptions _options;
+
         public PostgreSauceStore(
             NpgsqlConnection connection,
             string tableName,
             Dictionary<string, Type> eventTypes,
-            Dictionary<string, Type> aggregateTypes)
+            Dictionary<string, Type> aggregateTypes,
+            JsonSerializerOptions options)
         {
             _connection = connection;
             _tableName = tableName;
             _eventTypes = eventTypes;
             _aggregateTypes = aggregateTypes;
+            _options = options;
         }
 
         public async Task<IEnumerable<SaucyEvent>> ReadEvents(SaucyAggregateId id)
@@ -72,7 +76,7 @@ namespace EventSauce.Postgre
                         aggregate = (SaucyAggregateId)Activator.CreateInstance(aggregateIdType, aggregateId)!;
                     }
 
-                    var sourceEvent = (SaucyEvent)JsonSerializer.Deserialize(eventData, eventType)!;
+                    var sourceEvent = (SaucyEvent)JsonSerializer.Deserialize(eventData, eventType, _options)!;
 
                     result.Add(sourceEvent with
                     {
@@ -95,10 +99,7 @@ namespace EventSauce.Postgre
         {
             try
             {
-                var eventData = JsonSerializer.Serialize(sourceEvent, sourceEvent.GetType(), new JsonSerializerOptions
-                {
-                    WriteIndented = false
-                });
+                var eventData = JsonSerializer.Serialize(sourceEvent, sourceEvent.GetType(), _options);
 
                 var eventType = sourceEvent.GetType().Name;
 

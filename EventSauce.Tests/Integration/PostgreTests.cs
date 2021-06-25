@@ -3,6 +3,7 @@ using EventSauce.Postgre;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -27,6 +28,10 @@ namespace EventSauce.Tests.Integration
                     new[]
                     {
                         typeof(PostgreTests).Assembly
+                    },
+                    new JsonSerializerOptions
+                    {
+                        WriteIndented = false
                     },
                     connectionString);
 
