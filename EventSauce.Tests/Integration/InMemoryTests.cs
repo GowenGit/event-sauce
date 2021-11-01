@@ -71,7 +71,7 @@ namespace EventSauce.Tests.Integration
             Assert.Equal(auth, createdEvent?.AuthId);
             Assert.Equal(0, createdEvent?.AggregateVersion);
 
-            Assert.NotEqual(Guid.Empty, createdEvent?.EventId);
+            Assert.NotEqual(Guid.Empty, createdEvent?.Id);
             Assert.True(createdEvent?.Created > PastDate());
 
             Assert.Equal(userId, user.Id);
@@ -106,7 +106,7 @@ namespace EventSauce.Tests.Integration
             Assert.Equal(auth, createdEvent?.AuthId);
             Assert.Equal(0, createdEvent?.AggregateVersion);
 
-            Assert.NotEqual(Guid.Empty, createdEvent?.EventId);
+            Assert.NotEqual(Guid.Empty, createdEvent?.Id);
             Assert.True(createdEvent?.Created > PastDate());
 
             var changeEmailEvent = events[1] as UserChangeEmailEvent;
@@ -117,7 +117,7 @@ namespace EventSauce.Tests.Integration
             Assert.Equal(newEmail, changeEmailEvent?.Email);
             Assert.Equal(1, changeEmailEvent?.AggregateVersion);
 
-            Assert.NotEqual(Guid.Empty, changeEmailEvent?.EventId);
+            Assert.NotEqual(Guid.Empty, changeEmailEvent?.Id);
             Assert.True(changeEmailEvent?.Created > PastDate());
 
             Assert.Equal(userId, user.Id);

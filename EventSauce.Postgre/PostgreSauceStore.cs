@@ -82,7 +82,7 @@ namespace EventSauce.Postgre
                     {
                         AggregateVersion = aggregateVersion,
                         AggregateId = aggregate,
-                        EventId = eventId,
+                        Id = eventId,
                         Created = created
                     });
                 }
@@ -111,7 +111,7 @@ namespace EventSauce.Postgre
                 command.Parameters.AddWithValue("aggregate_id_type", sourceEvent.AggregateId?.IdType ?? throw new ArgumentNullException(nameof(sourceEvent.AggregateId)));
                 command.Parameters.AddWithValue("aggregate_version", sourceEvent.AggregateVersion);
                 command.Parameters.AddWithValue("created", sourceEvent.Created);
-                command.Parameters.AddWithValue("event_id", sourceEvent.EventId);
+                command.Parameters.AddWithValue("event_id", sourceEvent.Id);
                 command.Parameters.AddWithValue("event_type", eventType);
                 command.Parameters.AddWithValue("event_data", NpgsqlDbType.Jsonb, eventData);
                 command.Parameters.AddWithValue("performed_by", performedBy?.Id ?? Guid.Empty);

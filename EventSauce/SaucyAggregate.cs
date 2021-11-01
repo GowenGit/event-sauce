@@ -21,7 +21,7 @@ namespace EventSauce
         internal void ApplyEvent(SaucyEvent saucyEvent)
         {
             // Event was already applied
-            if (_uncommittedEvents.Any(x => x.EventId == saucyEvent.EventId))
+            if (_uncommittedEvents.Any(x => x.Id == saucyEvent.Id))
             {
                 return;
             }
@@ -66,9 +66,9 @@ namespace EventSauce
                 throw new EventSauceException($"Aggregate ID {aggregateId} is not valid");
             }
 
-            if (saucyEvent.EventId == Guid.Empty)
+            if (saucyEvent.Id == Guid.Empty)
             {
-                throw new EventSauceException($"Event ID {saucyEvent.EventId} is not valid");
+                throw new EventSauceException($"Event ID {saucyEvent.Id} is not valid");
             }
 
             return saucyEvent with
@@ -94,7 +94,7 @@ namespace EventSauce
     public abstract record SaucyEvent
     {
         [JsonIgnore]
-        public Guid EventId { get; init; } = Guid.NewGuid();
+        public Guid Id { get; init; } = Guid.NewGuid();
 
         [JsonIgnore]
         public DateTime Created { get; init; } = DateTime.UtcNow;
@@ -107,7 +107,7 @@ namespace EventSauce
 
         public override string ToString()
         {
-            return $"[{EventId}| Aggregate: {AggregateId} | Version: {AggregateVersion}]";
+            return $"[{Id}| Aggregate: {AggregateId} | Version: {AggregateVersion}]";
         }
     }
 }

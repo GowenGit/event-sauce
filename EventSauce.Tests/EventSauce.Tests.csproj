@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="Obsessive.Defender" Version="1.0.1">
       <PrivateAssets>all</PrivateAssets>
@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EventSauce.Extensions.Microsoft.DependencyInjection\EventSauce.Extensions.Microsoft.DependencyInjection.csproj" />
+    <ProjectReference Include="..\EventSauce.MongoDB\EventSauce.MongoDB.csproj" />
     <ProjectReference Include="..\EventSauce.Postgre\EventSauce.Postgre.csproj" />
     <ProjectReference Include="..\EventSauce\EventSauce.csproj" />
   </ItemGroup>
