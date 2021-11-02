@@ -104,7 +104,22 @@ namespace EventSauce.MongoDB
 
             var collection = database.GetCollection<BsonDocument>(_collection, settings);
 
+            CreateIndex(collection, nameof(SaucyEvent.AggregateId), false);
+
             return collection;
+        }
+
+        private static void CreateIndex(IMongoCollection<BsonDocument> collection, string field, bool isUnique)
+        {
+            var indexBuilder = Builders<BsonDocument>.IndexKeys;
+
+            var keys = indexBuilder.Ascending(field);
+
+            var options = new CreateIndexOptions { Unique = isUnique };
+
+            var indexModel = new CreateIndexModel<BsonDocument>(keys, options);
+
+            collection.Indexes.CreateOne(indexModel);
         }
 
         private static void RegisterType(Type type)
