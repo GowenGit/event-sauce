@@ -33,3 +33,6 @@ jobs:
 
     - name: Deploy NuGet Postgre Binaries
       run: dotnet nuget push out/EventSauce.Postgre.${{ steps.vars.outputs.tag }}.nupkg -k ${{ secrets.CICD_KEY }} -s https://api.nuget.org/v3/index.json
+
+    - name: Deploy NuGet MongoDB Binaries
+      run: dotnet nuget push out/EventSauce.MongoDB.${{ steps.vars.outputs.tag }}.nupkg -k ${{ secrets.CICD_KEY }} -s https://api.nuget.org/v3/index.json

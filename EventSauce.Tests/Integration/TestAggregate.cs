@@ -26,6 +26,15 @@ namespace EventSauce.Tests.Integration
             });
         }
 
+        public void ChangeEmailToInvalid(string email)
+        {
+            IssueEvent(new UserChangeEmailToInvalidEvent
+            {
+                Email = email,
+                IsValid = true
+            });
+        }
+
         /// <summary>
         /// Apply events need to be defined
         /// for each applicable event since this is
@@ -53,6 +62,11 @@ namespace EventSauce.Tests.Integration
     public record UserChangeEmailEvent : SaucyEvent
     {
         public string Email { get; init; } = string.Empty;
+    }
+
+    public record UserChangeEmailToInvalidEvent : UserChangeEmailEvent
+    {
+        public bool IsValid { get; init; } = false;
     }
 
     public record User : SaucyAggregateId
