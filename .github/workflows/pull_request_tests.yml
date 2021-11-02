@@ -16,6 +16,13 @@ jobs:
           POSTGRES_DB: sauce
         ports:
         - 5433:5432
+      mongodb:
+        image: mongo:5.0.3
+        env:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: password
+        ports:
+          - 27018:27017
 
     steps:
     - uses: actions/checkout@v1
