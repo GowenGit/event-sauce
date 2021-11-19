@@ -15,8 +15,9 @@ namespace EventSauce.Extensions.Microsoft.DependencyInjection
             options?.Invoke(settings);
 
             services.AddTransient<ISaucyRepository, SaucyRepository>();
-            services.AddTransient(settings.Store);
-            services.AddTransient(settings.Bus);
+
+            services.Add(new ServiceDescriptor(typeof(ISauceStore), settings.Store, settings.StoreLifetime));
+            services.Add(new ServiceDescriptor(typeof(ISaucyBus), settings.Bus, settings.BusLifetime));
         }
     }
 
@@ -30,5 +31,9 @@ namespace EventSauce.Extensions.Microsoft.DependencyInjection
         public Func<IServiceProvider, ISauceStore> Store { get; set; } = x => new InMemorySauceStore();
 
         public Func<IServiceProvider, ISaucyBus> Bus { get; set; } = x => new StubbedSauceBus();
+
+        public ServiceLifetime BusLifetime { get; set; } = ServiceLifetime.Transient;
+
+        public ServiceLifetime StoreLifetime { get; set; } = ServiceLifetime.Transient;
     }
 }
