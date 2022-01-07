@@ -12,23 +12,28 @@ namespace EventSauce.MongoDB
     public class MongoDBSauceStoreFactory
     {
         private readonly Assembly[] _assemblies;
-        private readonly string _connectionString;
+        private readonly MongoClientSettings _clientSettings;
         private readonly string _database;
         private readonly string _collection;
 
         public MongoDBSauceStoreFactory(
             Assembly[] assemblies,
             string connectionString,
-            string database) : this(assemblies, connectionString, database, "events") { }
+            string database) : this(assemblies, MongoClientSettings.FromConnectionString(connectionString), database, "events") { }
 
         public MongoDBSauceStoreFactory(
             Assembly[] assemblies,
-            string connectionString,
+            MongoClientSettings clientSettings,
+            string database) : this(assemblies, clientSettings, database, "events") { }
+
+        public MongoDBSauceStoreFactory(
+            Assembly[] assemblies,
+            MongoClientSettings clientSettings,
             string database,
             string collection)
         {
             _assemblies = assemblies;
-            _connectionString = connectionString;
+            _clientSettings = clientSettings;
             _database = database;
             _collection = collection;
 
@@ -93,7 +98,7 @@ namespace EventSauce.MongoDB
 
         private IMongoCollection<BsonDocument> CreateCollection()
         {
-            var client = new MongoClient(_connectionString);
+            var client = new MongoClient(_clientSettings);
 
             var database = client.GetDatabase(_database);
 
