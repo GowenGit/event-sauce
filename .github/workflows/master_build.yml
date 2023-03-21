@@ -9,7 +9,7 @@ jobs:
   run-tests:
     name: Testing
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     services:
       mysql:
         image: postgres:13.2
@@ -32,7 +32,7 @@ jobs:
 
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '5.0.203'
+        dotnet-version: '7.0.x'
 
     - name: Run dotnet tests
       run: dotnet test

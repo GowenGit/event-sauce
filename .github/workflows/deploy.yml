@@ -9,7 +9,7 @@ jobs:
   build-nuget:
     name: Deployment
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Set version tag
@@ -20,7 +20,7 @@ jobs:
 
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '5.0.203'
+        dotnet-version: '7.0.x'
 
     - name: Build NuGet
       run: dotnet pack -c Release -o out --version-suffix ${{ steps.vars.outputs.tag }}
