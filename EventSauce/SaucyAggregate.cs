@@ -26,10 +26,7 @@ namespace EventSauce
                 return;
             }
 
-            if (Id == null)
-            {
-                Id = saucyEvent.AggregateId;
-            }
+            Id ??= saucyEvent.AggregateId;
 
             // Apparently this is faster
             // than switch cases
@@ -66,11 +63,6 @@ namespace EventSauce
                 throw new EventSauceException($"Aggregate ID {aggregateId} is not valid");
             }
 
-            if (saucyEvent.Id == Guid.Empty)
-            {
-                throw new EventSauceException($"Event ID {saucyEvent.Id} is not valid");
-            }
-
             return saucyEvent with
             {
                 AggregateId = aggregateId,
@@ -95,7 +87,7 @@ namespace EventSauce
         private string IdType => GetType().Name;
 
         [JsonIgnore]
-        public Guid Id { get; init; }
+        public Guid Id { get; init; } = Guid.NewGuid();
 
         [JsonIgnore]
         public DateTime Created { get; init; } = DateTime.UtcNow;

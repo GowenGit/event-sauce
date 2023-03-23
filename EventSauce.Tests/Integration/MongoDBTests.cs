@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
+#pragma warning disable CA1711
+
 namespace EventSauce.Tests.Integration
 {
     public sealed class MongoDBStorageFixture : IDisposable
