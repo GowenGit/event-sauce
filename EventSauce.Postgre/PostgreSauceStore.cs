@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-#pragma warning disable CA2100
-
 namespace EventSauce.Postgre
 {
     internal class PostgreSauceStore : ISauceStore

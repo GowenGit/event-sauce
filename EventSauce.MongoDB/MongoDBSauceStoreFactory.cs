@@ -4,8 +4,7 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-
-#pragma warning disable CA2100
+using MongoDB.Bson.Serialization.IdGenerators;
 
 namespace EventSauce.MongoDB
 {
@@ -46,6 +45,8 @@ namespace EventSauce.MongoDB
             {
                 var saucyEventTypes = new List<Type>();
 
+                var saucyAggregateEventTypes = new List<Type>();
+
                 foreach (var assembly in _assemblies)
                 {
                     foreach (var type in assembly.GetTypes())
@@ -60,6 +61,8 @@ namespace EventSauce.MongoDB
                         if (type.IsSubclassOf(typeof(SaucyAggregateId)))
                         {
                             RegisterType(type);
+
+                            saucyAggregateEventTypes.Add(type);
                         }
                     }
                 }
@@ -70,7 +73,23 @@ namespace EventSauce.MongoDB
                     map.AutoMap();
                     map.SetIsRootClass(true);
 
+                    map.IdMemberMap.SetIdGenerator(CombGuidGenerator.Instance);
+
                     foreach (var type in saucyEventTypes)
+                    {
+                        map.AddKnownType(type);
+                    }
+
+                });
+
+                BsonClassMap.RegisterClassMap<SaucyAggregateId>(map =>
+                {
+                    map.AutoMap();
+                    map.SetIsRootClass(true);
+
+                    map.IdMemberMap.SetIdGenerator(CombGuidGenerator.Instance);
+
+                    foreach (var type in saucyAggregateEventTypes)
                     {
                         map.AddKnownType(type);
                     }

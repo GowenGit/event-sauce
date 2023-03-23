@@ -6,8 +6,6 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
-#pragma warning disable CA2100
-
 namespace EventSauce.MongoDB
 {
     internal class MongoDBSauceStore : ISauceStore

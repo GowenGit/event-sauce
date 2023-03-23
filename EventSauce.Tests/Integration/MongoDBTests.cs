@@ -6,8 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-#pragma warning disable CA1711
-
 namespace EventSauce.Tests.Integration
 {
     public sealed class MongoDBStorageFixture : IDisposable
@@ -19,7 +17,7 @@ namespace EventSauce.Tests.Integration
             var services = new ServiceCollection();
 
             const string connectionString =
-                "mongodb://root:password@localhost:27018/";
+                "mongodb://root:password@192.168.8.44:27018/";
 
             services.AddEventSauce(options =>
             {

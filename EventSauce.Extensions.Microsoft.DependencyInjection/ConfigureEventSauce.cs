@@ -2,8 +2,6 @@
 using System;
 using System.Reflection;
 
-#pragma warning disable SA1623
-
 namespace EventSauce.Extensions.Microsoft.DependencyInjection
 {
     public static class ConfigureEventSauce

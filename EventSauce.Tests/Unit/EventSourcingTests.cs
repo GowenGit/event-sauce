@@ -15,10 +15,7 @@ namespace EventSauce.Tests.Unit
 
         internal record UnitUser : SaucyAggregateId
         {
-            public UnitUser(Guid id)
-            {
-                Id = id;
-            }
+            public UnitUser(Guid id) : base(id) { }
 
             public static UnitUser NewUser()
             {

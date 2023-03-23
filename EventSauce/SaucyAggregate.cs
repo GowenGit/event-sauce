@@ -79,11 +79,9 @@ namespace EventSauce
         }
     }
 
-    public abstract record SaucyAggregateId
+    public abstract record SaucyAggregateId(Guid Id)
     {
         public string IdType => GetType().Name;
-
-        public Guid Id { get; init; }
 
         public override string ToString()
         {
@@ -93,6 +91,9 @@ namespace EventSauce
 
     public abstract record SaucyEvent
     {
+        [JsonIgnore]
+        private string IdType => GetType().Name;
+
         [JsonIgnore]
         public Guid Id { get; init; } = Guid.NewGuid();
 
@@ -107,7 +108,7 @@ namespace EventSauce
 
         public override string ToString()
         {
-            return $"[{Id}| Aggregate: {AggregateId} | Version: {AggregateVersion}]";
+            return $"[{IdType}|{Id}|Aggregate: {AggregateId}|Version: {AggregateVersion}]";
         }
     }
 }

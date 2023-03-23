@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text.Json;
 
-#pragma warning disable CA2100
-
 namespace EventSauce.Postgre
 {
     public class PostgreSauceStoreFactory
