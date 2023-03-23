@@ -95,7 +95,7 @@ namespace EventSauce
         private string IdType => GetType().Name;
 
         [JsonIgnore]
-        public Guid Id { get; init; } = Guid.NewGuid();
+        public Guid Id { get; init; }
 
         [JsonIgnore]
         public DateTime Created { get; init; } = DateTime.UtcNow;

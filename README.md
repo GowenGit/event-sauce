@@ -45,10 +45,7 @@ public record UserChangeEmailEvent : SaucyEvent
 ```csharp
 public record User : SaucyAggregateId
 {
-    public User(Guid id)
-    {
-        Id = id;
-    }
+    public User(Guid id) : base(id) { }
 
     public static User NewUser()
     {
