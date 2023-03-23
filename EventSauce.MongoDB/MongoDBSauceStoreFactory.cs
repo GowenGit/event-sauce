@@ -73,8 +73,6 @@ namespace EventSauce.MongoDB
                     map.AutoMap();
                     map.SetIsRootClass(true);
 
-                    map.IdMemberMap.SetIdGenerator(CombGuidGenerator.Instance);
-
                     foreach (var type in saucyEventTypes)
                     {
                         map.AddKnownType(type);
@@ -86,8 +84,6 @@ namespace EventSauce.MongoDB
                 {
                     map.AutoMap();
                     map.SetIsRootClass(true);
-
-                    map.IdMemberMap.SetIdGenerator(CombGuidGenerator.Instance);
 
                     foreach (var type in saucyAggregateEventTypes)
                     {
