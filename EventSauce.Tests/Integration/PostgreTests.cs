@@ -18,7 +18,7 @@ namespace EventSauce.Tests.Integration
             var services = new ServiceCollection();
 
             const string connectionString =
-                "Server=localhost;Port=5433;Database=sauce;User Id=postgres;Password=password;";
+                "Server=localhost;Port=5432;Database=sauce;User Id=postgres;Password=password;";
 
             services.AddEventSauce(options =>
             {

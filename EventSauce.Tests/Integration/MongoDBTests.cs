@@ -19,7 +19,7 @@ namespace EventSauce.Tests.Integration
             var services = new ServiceCollection();
 
             const string connectionString =
-                "mongodb://root:password@localhost:27018/";
+                "mongodb://root:password@localhost:27017/";
 
             services.AddEventSauce(options =>
             {

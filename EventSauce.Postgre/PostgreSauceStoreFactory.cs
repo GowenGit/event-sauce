@@ -13,13 +13,15 @@ namespace EventSauce.Postgre
         private readonly string _connectionString;
         private readonly string _tableName;
 
-        private readonly Dictionary<string, Type> _eventTypes = new ();
-        private readonly Dictionary<string, Type> _aggregateTypes = new ();
+        private readonly Dictionary<string, Type> _eventTypes = new();
+        private readonly Dictionary<string, Type> _aggregateTypes = new();
 
         public PostgreSauceStoreFactory(
             Assembly[] assemblies,
             JsonSerializerOptions options,
-            string connectionString) : this(assemblies, options, connectionString, "saucy_events") {}
+            string connectionString) : this(assemblies, options, connectionString, "saucy_events")
+        {
+        }
 
         public PostgreSauceStoreFactory(
             Assembly[] assemblies,
@@ -58,11 +60,13 @@ namespace EventSauce.Postgre
         {
             try
             {
+                var genericEventType = typeof(SaucyEvent<>);
+
                 foreach (var assembly in _assemblies)
                 {
                     foreach (var type in assembly.GetTypes())
                     {
-                        if (type.IsSubclassOf(typeof(SaucyEvent<>)))
+                        if (IsSubclassOfRawGeneric(genericEventType, type))
                         {
                             _eventTypes.Add(type.Name, type);
                         }
@@ -106,6 +110,23 @@ namespace EventSauce.Postgre
         private string GetCommand(string text)
         {
             return string.Format(text, _tableName);
+        }
+
+        private static bool IsSubclassOfRawGeneric(Type generic, Type? toCheck)
+        {
+            while (toCheck != null && toCheck != typeof(object))
+            {
+                var current = toCheck.IsGenericType ? toCheck.GetGenericTypeDefinition() : toCheck;
+
+                if (generic == current)
+                {
+                    return true;
+                }
+
+                toCheck = toCheck.BaseType!;
+            }
+
+            return false;
         }
     }
 }

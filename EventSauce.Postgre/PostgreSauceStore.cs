@@ -44,9 +44,9 @@ namespace EventSauce.Postgre
 
                 await using var reader = await command.ExecuteReaderAsync();
 
-                var result = new List<SaucyEvent<SaucyAggregateId>>();
+                var result = new List<SaucyEvent<TAggregateId>>();
 
-                SaucyAggregateId? aggregate = null;
+                TAggregateId? aggregate = null;
 
                 var eventTypeIndex = reader.GetOrdinal("EventType");
                 var eventDataIndex = reader.GetOrdinal("EventData");
@@ -71,10 +71,10 @@ namespace EventSauce.Postgre
                         var aggregateId = reader.GetSaucyGuid(aggregateIdIndex);
                         var aggregateIdTypeName = reader.GetSaucyString(aggregateIdTypeNameIndex);
                         var aggregateIdType = _aggregateTypes[aggregateIdTypeName];
-                        aggregate = (SaucyAggregateId)Activator.CreateInstance(aggregateIdType, aggregateId)!;
+                        aggregate = (TAggregateId) Activator.CreateInstance(aggregateIdType, aggregateId)!;
                     }
 
-                    var sourceEvent = (SaucyEvent<SaucyAggregateId>)JsonSerializer.Deserialize(eventData, eventType, _options)!;
+                    var sourceEvent = (SaucyEvent<TAggregateId>) JsonSerializer.Deserialize(eventData, eventType, _options)!;
 
                     result.Add(sourceEvent with
                     {
@@ -85,7 +85,7 @@ namespace EventSauce.Postgre
                     });
                 }
 
-                return (IEnumerable<SaucyEvent<TAggregateId>>)result;
+                return result;
             }
             catch (Exception ex)
             {
