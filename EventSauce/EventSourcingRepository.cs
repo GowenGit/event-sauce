@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EventSauce
 {
     public interface ISaucyRepository
     {
-        Task<TAggregate?> GetById<TAggregate>(SaucyAggregateId id)
-            where TAggregate : SaucyAggregate;
+        Task<TAggregate?> GetById<TAggregate, TAggregateId>(TAggregateId id, CancellationToken cancellationToken = default)
+            where TAggregate : SaucyAggregate<TAggregateId>
+            where TAggregateId : SaucyAggregateId;
 
-        Task Save<TAggregate>(TAggregate aggregate, SaucyAggregateId? performedBy = null)
-            where TAggregate : SaucyAggregate;
+        Task Save<TAggregate, TAggregateId>(TAggregate aggregate, SaucyAggregateId? performedBy = null, CancellationToken cancellationToken = default)
+            where TAggregate : SaucyAggregate<TAggregateId>
+            where TAggregateId : SaucyAggregateId;
     }
 
     public class SaucyRepository : ISaucyRepository
@@ -26,8 +29,9 @@ namespace EventSauce
             _eventBus = saucyBus;
         }
 
-        public async Task<TAggregate?> GetById<TAggregate>(SaucyAggregateId id)
-            where TAggregate : SaucyAggregate
+        public async Task<TAggregate?> GetById<TAggregate, TAggregateId>(TAggregateId id, CancellationToken cancellationToken = default)
+            where TAggregate : SaucyAggregate<TAggregateId>
+            where TAggregateId : SaucyAggregateId
         {
             try
             {
@@ -38,7 +42,7 @@ namespace EventSauce
                     aggregate.ApplyEvent(domainEvent);
                 }
 
-                return aggregate.Version == SaucyAggregate.NewAggregateVersion ? null : aggregate;
+                return aggregate.Version == SaucyAggregate<TAggregateId>.NewAggregateVersion ? null : aggregate;
             }
             catch (EventSauceAggregateNotFoundException)
             {
@@ -50,8 +54,9 @@ namespace EventSauce
             }
         }
 
-        public async Task Save<TAggregate>(TAggregate aggregate, SaucyAggregateId? performedBy = null)
-            where TAggregate : SaucyAggregate
+        public async Task Save<TAggregate, TAggregateId>(TAggregate aggregate, SaucyAggregateId? performedBy = null, CancellationToken cancellationToken = default)
+            where TAggregate : SaucyAggregate<TAggregateId>
+            where TAggregateId : SaucyAggregateId
         {
             try
             {

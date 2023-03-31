@@ -139,7 +139,7 @@ namespace EventSauce.Tests.Integration
 
             var sut = _fixture.GetSutObject();
 
-            await sut.Save(user);
+            await sut.Save<UserAggregate, User>(user);
 
             var events = user.GetUncommittedEvents().ToList();
 
@@ -162,13 +162,13 @@ namespace EventSauce.Tests.Integration
 
             var sut = _fixture.GetSutObject();
 
-            var repoUser = await sut.GetById<UserAggregate>(userId);
+            var repoUser = await sut.GetById<UserAggregate, User>(userId);
 
             Assert.Null(repoUser);
 
-            await sut.Save(user);
+            await sut.Save<UserAggregate, User>(user);
 
-            repoUser = await sut.GetById<UserAggregate>(userId);
+            repoUser = await sut.GetById<UserAggregate, User>(userId);
 
             Assert.NotNull(repoUser);
 
@@ -193,13 +193,13 @@ namespace EventSauce.Tests.Integration
 
             var sut = _fixture.GetSutObject();
 
-            var repoUser = await sut.GetById<UserAggregate>(userId);
+            var repoUser = await sut.GetById<UserAggregate, User>(userId);
 
             Assert.Null(repoUser);
 
-            await sut.Save(user);
+            await sut.Save<UserAggregate, User>(user);
 
-            repoUser = await sut.GetById<UserAggregate>(userId);
+            repoUser = await sut.GetById<UserAggregate, User>(userId);
 
             Assert.NotNull(repoUser);
 

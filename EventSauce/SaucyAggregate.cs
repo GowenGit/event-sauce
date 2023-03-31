@@ -8,17 +8,17 @@ using System.Text.Json.Serialization;
 
 namespace EventSauce
 {
-    public abstract class SaucyAggregate
+    public abstract class SaucyAggregate<TAggregateId> where TAggregateId : SaucyAggregateId
     {
-        private readonly ICollection<SaucyEvent> _uncommittedEvents = new LinkedList<SaucyEvent>();
+        private readonly ICollection<SaucyEvent<TAggregateId>> _uncommittedEvents = new LinkedList<SaucyEvent<TAggregateId>>();
 
         internal const long NewAggregateVersion = -1;
 
-        public SaucyAggregateId? Id { get; private set; }
+        public TAggregateId? Id { get; private set; }
 
         public long Version { get; private set; } = NewAggregateVersion;
 
-        internal void ApplyEvent(SaucyEvent saucyEvent)
+        internal void ApplyEvent(SaucyEvent<TAggregateId> saucyEvent)
         {
             // Event was already applied
             if (_uncommittedEvents.Any(x => x.Id == saucyEvent.Id))
@@ -40,12 +40,12 @@ namespace EventSauce
             _uncommittedEvents.Clear();
         }
 
-        internal IEnumerable<SaucyEvent> GetUncommittedEvents()
+        internal IEnumerable<SaucyEvent<TAggregateId>> GetUncommittedEvents()
         {
             return _uncommittedEvents.AsEnumerable();
         }
 
-        protected void IssueEvent(SaucyEvent saucyEvent)
+        protected void IssueEvent(SaucyEvent<TAggregateId> saucyEvent)
         {
             var eventWithAggregate = HydrateEvent(saucyEvent);
 
@@ -54,7 +54,7 @@ namespace EventSauce
             _uncommittedEvents.Add(eventWithAggregate);
         }
 
-        private SaucyEvent HydrateEvent(SaucyEvent saucyEvent)
+        private SaucyEvent<TAggregateId> HydrateEvent(SaucyEvent<TAggregateId> saucyEvent)
         {
             var aggregateId = Id ?? saucyEvent.AggregateId;
 
@@ -81,22 +81,17 @@ namespace EventSauce
         }
     }
 
-    public abstract record SaucyEvent
+    public abstract record SaucyEvent<TAggregateId> where TAggregateId : SaucyAggregateId
     {
-        [JsonIgnore]
-        private string IdType => GetType().Name;
+        [JsonIgnore] private string IdType => GetType().Name;
 
-        [JsonIgnore]
-        public Guid Id { get; init; } = Guid.NewGuid();
+        [JsonIgnore] public Guid Id { get; init; } = Guid.NewGuid();
 
-        [JsonIgnore]
-        public DateTime Created { get; init; } = DateTime.UtcNow;
+        [JsonIgnore] public DateTime Created { get; init; } = DateTime.UtcNow;
 
-        [JsonIgnore]
-        public SaucyAggregateId? AggregateId { get; init; }
+        [JsonIgnore] public TAggregateId? AggregateId { get; init; }
 
-        [JsonIgnore]
-        public long AggregateVersion { get; init; }
+        [JsonIgnore] public long AggregateVersion { get; init; }
 
         public override string ToString()
         {

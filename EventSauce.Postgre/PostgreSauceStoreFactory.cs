@@ -62,7 +62,7 @@ namespace EventSauce.Postgre
                 {
                     foreach (var type in assembly.GetTypes())
                     {
-                        if (type.IsSubclassOf(typeof(SaucyEvent)))
+                        if (type.IsSubclassOf(typeof(SaucyEvent<>)))
                         {
                             _eventTypes.Add(type.Name, type);
                         }

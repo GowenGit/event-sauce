@@ -6,7 +6,7 @@ namespace EventSauce.Tests.Unit
 {
     public class EventSourcingTests
     {
-        internal record UnitUserCreatedEvent : SaucyEvent
+        internal record UnitUserCreatedEvent : SaucyEvent<UnitUser>
         {
             public string Email { get; init; } = string.Empty;
 

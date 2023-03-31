@@ -7,19 +7,19 @@ namespace EventSauce
 {
     public interface ISauceStore : IDisposable
     {
-        Task<IEnumerable<SaucyEvent>> ReadEvents(SaucyAggregateId id);
+        Task<IEnumerable<SaucyEvent<TAggregateId>>> ReadEvents<TAggregateId>(TAggregateId id) where TAggregateId : SaucyAggregateId;
 
-        Task AppendEvent(SaucyEvent sourceEvent, SaucyAggregateId? performedBy);
+        Task AppendEvent<TAggregateId>(SaucyEvent<TAggregateId> sourceEvent, SaucyAggregateId? performedBy) where TAggregateId : SaucyAggregateId;
     }
 
     public interface ISaucyBus
     {
-        Task Publish(SaucyEvent saucyEvent);
+        Task Publish<TAggregateId>(SaucyEvent<TAggregateId> saucyEvent) where TAggregateId : SaucyAggregateId;
     }
 
     public class StubbedSauceBus : ISaucyBus
     {
-        public Task Publish(SaucyEvent saucyEvent)
+        public Task Publish<TAggregateId>(SaucyEvent<TAggregateId> saucyEvent) where TAggregateId : SaucyAggregateId
         {
             return Task.CompletedTask;
         }
@@ -27,20 +27,36 @@ namespace EventSauce
 
     public sealed class InMemorySauceStore : ISauceStore
     {
-        private static readonly List<SaucyEvent> Sauces = new ();
+        private static readonly Dictionary<string, List<object>> Store = new();
 
-        public Task<IEnumerable<SaucyEvent>> ReadEvents(SaucyAggregateId id)
+        public void Dispose()
         {
-            return Task.FromResult(Sauces.Where(x => x.AggregateId == id));
         }
 
-        public Task AppendEvent(SaucyEvent sourceEvent, SaucyAggregateId? performedBy)
+        public Task<IEnumerable<SaucyEvent<TAggregateId>>> ReadEvents<TAggregateId>(TAggregateId id) where TAggregateId : SaucyAggregateId
         {
-            Sauces.Add(sourceEvent);
+            var type = typeof(TAggregateId);
+
+            if (!Store.ContainsKey(type.FullName!))
+            {
+                return Task.FromResult((IEnumerable<SaucyEvent<TAggregateId>>)new List<SaucyEvent<TAggregateId>>());
+            }
+
+            return Task.FromResult(Store[type.FullName!].Cast<SaucyEvent<TAggregateId>>().Where(x => x.AggregateId == id));
+        }
+
+        public Task AppendEvent<TAggregateId>(SaucyEvent<TAggregateId> sourceEvent, SaucyAggregateId? performedBy) where TAggregateId : SaucyAggregateId
+        {
+            var type = typeof(TAggregateId);
+
+            if (!Store.ContainsKey(type.FullName!))
+            {
+                Store[type.FullName!] = new List<object>();
+            }
+
+            Store[type.FullName!].Add(sourceEvent);
 
             return Task.CompletedTask;
         }
-
-        public void Dispose() { }
     }
 }

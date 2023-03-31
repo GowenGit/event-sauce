@@ -2,7 +2,7 @@
 
 namespace EventSauce.Tests.Integration
 {
-    public class UserAggregate : SaucyAggregate
+    public class UserAggregate : SaucyAggregate<User>
     {
         private UserAggregate() { }
 
@@ -52,14 +52,14 @@ namespace EventSauce.Tests.Integration
         }
     }
 
-    public record UserCreatedEvent : SaucyEvent
+    public record UserCreatedEvent : SaucyEvent<User>
     {
         public string Email { get; init; } = string.Empty;
 
         public string AuthId { get; init; } = string.Empty;
     }
 
-    public record UserChangeEmailEvent : SaucyEvent
+    public record UserChangeEmailEvent : SaucyEvent<User>
     {
         public string Email { get; init; } = string.Empty;
     }
