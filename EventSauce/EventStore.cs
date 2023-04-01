@@ -7,19 +7,19 @@ namespace EventSauce
 {
     public interface ISauceStore : IDisposable
     {
-        Task<IEnumerable<SaucyEvent<TAggregateId>>> ReadEvents<TAggregateId>(TAggregateId id) where TAggregateId : SaucyAggregateId;
+        Task<IEnumerable<SaucyEvent<TAggregateId>>> ReadEvents<TAggregateId>(TAggregateId id);
 
-        Task AppendEvent<TAggregateId>(SaucyEvent<TAggregateId> sourceEvent, SaucyAggregateId? performedBy) where TAggregateId : SaucyAggregateId;
+        Task AppendEvent<TAggregateId>(SaucyEvent<TAggregateId> sourceEvent, object? performedBy);
     }
 
     public interface ISaucyBus
     {
-        Task Publish<TAggregateId>(SaucyEvent<TAggregateId> saucyEvent) where TAggregateId : SaucyAggregateId;
+        Task Publish<TAggregateId>(SaucyEvent<TAggregateId> saucyEvent);
     }
 
     public class StubbedSauceBus : ISaucyBus
     {
-        public Task Publish<TAggregateId>(SaucyEvent<TAggregateId> saucyEvent) where TAggregateId : SaucyAggregateId
+        public Task Publish<TAggregateId>(SaucyEvent<TAggregateId> saucyEvent)
         {
             return Task.CompletedTask;
         }
@@ -33,7 +33,7 @@ namespace EventSauce
         {
         }
 
-        public Task<IEnumerable<SaucyEvent<TAggregateId>>> ReadEvents<TAggregateId>(TAggregateId id) where TAggregateId : SaucyAggregateId
+        public Task<IEnumerable<SaucyEvent<TAggregateId>>> ReadEvents<TAggregateId>(TAggregateId id)
         {
             var type = typeof(TAggregateId);
 
@@ -42,10 +42,10 @@ namespace EventSauce
                 return Task.FromResult((IEnumerable<SaucyEvent<TAggregateId>>)new List<SaucyEvent<TAggregateId>>());
             }
 
-            return Task.FromResult(Store[type.FullName!].Cast<SaucyEvent<TAggregateId>>().Where(x => x.AggregateId == id));
+            return Task.FromResult(Store[type.FullName!].Cast<SaucyEvent<TAggregateId>>().Where(x => x.AggregateId!.Equals(id)));
         }
 
-        public Task AppendEvent<TAggregateId>(SaucyEvent<TAggregateId> sourceEvent, SaucyAggregateId? performedBy) where TAggregateId : SaucyAggregateId
+        public Task AppendEvent<TAggregateId>(SaucyEvent<TAggregateId> sourceEvent, object? performedBy)
         {
             var type = typeof(TAggregateId);
 

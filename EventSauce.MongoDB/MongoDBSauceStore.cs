@@ -17,13 +17,17 @@ namespace EventSauce.MongoDB
             _collection = collection;
         }
 
-        public async Task<IEnumerable<SaucyEvent<TAggregateId>>> ReadEvents<TAggregateId>(TAggregateId id) where TAggregateId : SaucyAggregateId
+        public async Task<IEnumerable<SaucyEvent<TAggregateId>>> ReadEvents<TAggregateId>(TAggregateId id)
         {
             try
             {
                 const string fieldName = nameof(SaucyEvent<TAggregateId>.AggregateId);
 
-                using var cursor = await _collection.FindAsync(x => x[fieldName] == id.Id);
+                var serializer = BsonSerializer.SerializerRegistry.GetSerializer<TAggregateId>();
+
+                var value = serializer.ToBsonValue(id);
+
+                using var cursor = await _collection.FindAsync(x => x[fieldName] == value);
 
                 var result = new List<SaucyEvent<TAggregateId>>();
 
@@ -40,7 +44,7 @@ namespace EventSauce.MongoDB
             }
         }
 
-        public async Task AppendEvent<TAggregateId>(SaucyEvent<TAggregateId> sourceEvent, SaucyAggregateId? performedBy) where TAggregateId : SaucyAggregateId
+        public async Task AppendEvent<TAggregateId>(SaucyEvent<TAggregateId> sourceEvent, object? performedBy)
         {
             try
             {
@@ -51,9 +55,13 @@ namespace EventSauce.MongoDB
 
                 var bsonDocument = sourceEvent.ToBsonDocument();
 
+                bsonDocument.Add("_id", ObjectId.GenerateNewId());
+
                 if (performedBy != null)
                 {
-                    bsonDocument.Add("_performedBy", performedBy.Id);
+                    var serializer = BsonSerializer.SerializerRegistry.GetSerializer(performedBy.GetType());
+
+                    bsonDocument.Add("_performedBy", serializer.ToBsonValue(performedBy));
                 }
 
                 await _collection.InsertOneAsync(bsonDocument);

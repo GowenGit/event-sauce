@@ -1,35 +1,33 @@
 ﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System;
-using System.Reflection;
+using MongoDB.Bson.Serialization.Conventions;
 
 namespace EventSauce.MongoDB
 {
     public class MongoDBSauceStoreFactory
     {
-        private readonly Assembly[] _assemblies;
         private readonly MongoClientSettings _clientSettings;
         private readonly string _database;
         private readonly string _collection;
 
         public MongoDBSauceStoreFactory(
-            Assembly[] assemblies,
             string connectionString,
-            string database) : this(assemblies, MongoClientSettings.FromConnectionString(connectionString), database, "events") { }
+            string database) : this(MongoClientSettings.FromConnectionString(connectionString), database, "events")
+        {
+        }
 
         public MongoDBSauceStoreFactory(
-            Assembly[] assemblies,
             MongoClientSettings clientSettings,
-            string database) : this(assemblies, clientSettings, database, "events") { }
+            string database) : this(clientSettings, database, "events")
+        {
+        }
 
         public MongoDBSauceStoreFactory(
-            Assembly[] assemblies,
             MongoClientSettings clientSettings,
             string database,
             string collection)
         {
-            _assemblies = assemblies;
             _clientSettings = clientSettings;
             _database = database;
             _collection = collection;
@@ -41,28 +39,14 @@ namespace EventSauce.MongoDB
         {
             try
             {
+                var pack = new ConventionPack
+                {
+                    new IgnoreExtraElementsConvention(true)
+                };
+
                 var genericEventType = typeof(SaucyEvent<>);
 
-                foreach (var assembly in _assemblies)
-                {
-                    foreach (var type in assembly.GetTypes())
-                    {
-                        if (IsSubclassOfRawGeneric(genericEventType, type))
-                        {
-                            var map = new BsonClassMap(type);
-
-                            map.AutoMap();
-                            map.SetIgnoreExtraElements(true);
-
-                            BsonClassMap.RegisterClassMap(map);
-                        }
-
-                        if (type.IsSubclassOf(typeof(SaucyAggregateId)))
-                        {
-                            BsonSerializer.RegisterSerializer(type, new SaucyAggregateIdSerializer(type));
-                        }
-                    }
-                }
+                ConventionRegistry.Register("Sauce Conventions", pack, type => IsSubclassOfRawGeneric(genericEventType, type));
             }
             catch (Exception ex)
             {
@@ -97,7 +81,7 @@ namespace EventSauce.MongoDB
 
             var collection = database.GetCollection<BsonDocument>(_collection, settings);
 
-            CreateIndex(collection, nameof(SaucyEvent<SaucyAggregateId>.AggregateId), false);
+            CreateIndex(collection, nameof(SaucyEvent<object>.AggregateId), false);
 
             return collection;
         }
@@ -115,42 +99,14 @@ namespace EventSauce.MongoDB
             collection.Indexes.CreateOne(indexModel);
         }
 
-        private class SaucyAggregateIdSerializer : IBsonSerializer
+        private static bool IsSubclassOfRawGeneric(Type generic, Type? toCheck)
         {
-            private readonly Type _type;
-
-            public SaucyAggregateIdSerializer(Type type)
+            while (toCheck != null && toCheck != typeof(object))
             {
-                _type = type;
-            }
-
-            public object Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
-            {
-                var id = BsonSerializer.Deserialize<Guid?>(context.Reader);
-
-                var ctor = _type.GetConstructor(new[] { typeof(Guid) });
-
-                var instance = ctor!.Invoke(new object[] { id });
-
-                return instance;
-            }
-
-            public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value)
-            {
-                var aggregateId = (SaucyAggregateId)value;
-
-                BsonSerializer.Serialize(context.Writer, aggregateId.Id);
-            }
-
-            public Type ValueType => typeof(SaucyAggregateId);
-        }
-
-        private static bool IsSubclassOfRawGeneric(Type generic, Type? toCheck) {
-            while (toCheck != null && toCheck != typeof(object)) {
-
                 var current = toCheck.IsGenericType ? toCheck.GetGenericTypeDefinition() : toCheck;
 
-                if (generic == current) {
+                if (generic == current)
+                {
                     return true;
                 }
 

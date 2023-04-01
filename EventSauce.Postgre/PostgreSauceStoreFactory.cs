@@ -14,7 +14,6 @@ namespace EventSauce.Postgre
         private readonly string _tableName;
 
         private readonly Dictionary<string, Type> _eventTypes = new();
-        private readonly Dictionary<string, Type> _aggregateTypes = new();
 
         public PostgreSauceStoreFactory(
             Assembly[] assemblies,
@@ -70,11 +69,6 @@ namespace EventSauce.Postgre
                         {
                             _eventTypes.Add(type.Name, type);
                         }
-
-                        if (type.IsSubclassOf(typeof(SaucyAggregateId)))
-                        {
-                            _aggregateTypes.Add(type.Name, type);
-                        }
                     }
                 }
             }
@@ -90,7 +84,7 @@ namespace EventSauce.Postgre
             {
                 var connection = CreateConnection();
 
-                return new PostgreSauceStore(connection, _tableName, _eventTypes, _aggregateTypes, _options);
+                return new PostgreSauceStore(connection, _tableName, _eventTypes, _options);
             }
             catch (Exception ex)
             {

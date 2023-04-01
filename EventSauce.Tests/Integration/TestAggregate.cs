@@ -1,16 +1,20 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 
 namespace EventSauce.Tests.Integration
 {
-    public class UserAggregate : SaucyAggregate<User>
+    public class UserAggregate<T> : SaucyAggregate<T>
     {
         private UserAggregate() { }
 
         public string Email { get; private set; } = string.Empty;
 
-        public UserAggregate(User id, string email, string authId)
+        public UserAggregate(T id, string email, string authId)
         {
-            IssueEvent(new UserCreatedEvent
+            Id = id;
+
+            IssueEvent(new UserCreatedEvent<T>
             {
                 Email = email,
                 AuthId = authId,
@@ -20,7 +24,7 @@ namespace EventSauce.Tests.Integration
 
         public void ChangeEmail(string email)
         {
-            IssueEvent(new UserChangeEmailEvent
+            IssueEvent(new UserChangeEmailEvent<T>
             {
                 Email = email
             });
@@ -28,7 +32,7 @@ namespace EventSauce.Tests.Integration
 
         public void ChangeEmailToInvalid(string email)
         {
-            IssueEvent(new UserChangeEmailToInvalidEvent
+            IssueEvent(new UserChangeEmailToInvalidEvent<T>
             {
                 Email = email,
                 IsValid = true
@@ -41,41 +45,48 @@ namespace EventSauce.Tests.Integration
         /// how data is loaded back to the aggregate when
         /// reading from the database.
         /// </summary>
-        public void Apply(UserCreatedEvent domainEvent)
+        public void Apply(UserCreatedEvent<T> domainEvent)
         {
             Email = domainEvent.Email;
         }
 
-        public void Apply(UserChangeEmailEvent domainEvent)
+        public void Apply(UserChangeEmailEvent<T> domainEvent)
         {
             Email = domainEvent.Email;
         }
     }
 
-    public record UserCreatedEvent : SaucyEvent<User>
+    public record UserCreatedEvent<T> : SaucyEvent<T>
     {
         public string Email { get; init; } = string.Empty;
 
         public string AuthId { get; init; } = string.Empty;
     }
 
-    public record UserChangeEmailEvent : SaucyEvent<User>
+    public record UserChangeEmailEvent<T> : SaucyEvent<T>
     {
         public string Email { get; init; } = string.Empty;
     }
 
-    public record UserChangeEmailToInvalidEvent : UserChangeEmailEvent
+    public record UserChangeEmailToInvalidEvent<T> : UserChangeEmailEvent<T>
     {
         public bool IsValid { get; init; } = false;
     }
 
-    public record User : SaucyAggregateId
+    public record User(ObjectId Value)
     {
-        public User(Guid id) : base(id) { }
+        public static User New() => new(ObjectId.GenerateNewId());
+    }
 
-        public static User NewUser()
-        {
-            return new (Guid.NewGuid());
-        }
+    public class UserSerializer : SerializerBase<User>
+    {
+        private readonly IBsonSerializer<ObjectId> _serializer;
+        public UserSerializer(IBsonSerializer<ObjectId> serializer) => _serializer = serializer;
+
+        public override User Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
+            => new(_serializer.Deserialize(context, args));
+
+        public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, User value)
+            => _serializer.Serialize(context, args, value.Value);
     }
 }

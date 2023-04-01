@@ -6,40 +6,11 @@ namespace EventSauce.Tests.Unit
 {
     public class EventSourcingTests
     {
-        internal record UnitUserCreatedEvent : SaucyEvent<UnitUser>
+        internal record UnitUserCreatedEvent : SaucyEvent<Guid>
         {
             public string Email { get; init; } = string.Empty;
 
             public string AuthId { get; init; } = string.Empty;
-        }
-
-        internal record UnitUser : SaucyAggregateId
-        {
-            public UnitUser(Guid id) : base(id) { }
-
-            public static UnitUser NewUser()
-            {
-                return new (Guid.NewGuid());
-            }
-        }
-
-        [Fact]
-        public void AggregateIdBase_ShouldBeCompared_BasedOnProperties()
-        {
-            var guid = Guid.NewGuid();
-
-            var idOne = new UnitUser(guid);
-
-            var idTwo = new UnitUser(guid);
-
-            Assert.Equal(idOne, idTwo);
-
-            idTwo = idTwo with
-            {
-                Id = Guid.NewGuid()
-            };
-
-            Assert.NotEqual(idOne, idTwo);
         }
 
         [Fact]
@@ -48,14 +19,14 @@ namespace EventSauce.Tests.Unit
             var eventOne = new UnitUserCreatedEvent
             {
                 Email = "joseph@gmail.com",
-                AggregateId = UnitUser.NewUser(),
+                AggregateId = Guid.NewGuid(),
                 AggregateVersion = 1
             };
 
             var eventTwo = eventOne with
             {
                 Email = "adolf@gmail.com",
-                AggregateId = UnitUser.NewUser(),
+                AggregateId = Guid.NewGuid(),
                 AggregateVersion = 2
             };
 
@@ -68,7 +39,7 @@ namespace EventSauce.Tests.Unit
             var domainEvent = new UnitUserCreatedEvent
             {
                 Email = "joseph@gmail.com",
-                AggregateId = UnitUser.NewUser(),
+                AggregateId = Guid.NewGuid(),
                 AggregateVersion = 1,
                 AuthId = "some random id"
             };

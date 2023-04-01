@@ -13,7 +13,6 @@ namespace EventSauce.Postgre
         private readonly string _tableName;
 
         private readonly Dictionary<string, Type> _eventTypes;
-        private readonly Dictionary<string, Type> _aggregateTypes;
 
         private readonly JsonSerializerOptions _options;
 
@@ -21,17 +20,15 @@ namespace EventSauce.Postgre
             NpgsqlConnection connection,
             string tableName,
             Dictionary<string, Type> eventTypes,
-            Dictionary<string, Type> aggregateTypes,
             JsonSerializerOptions options)
         {
             _connection = connection;
             _tableName = tableName;
             _eventTypes = eventTypes;
-            _aggregateTypes = aggregateTypes;
             _options = options;
         }
 
-        public async Task<IEnumerable<SaucyEvent<TAggregateId>>> ReadEvents<TAggregateId>(TAggregateId id) where TAggregateId : SaucyAggregateId
+        public async Task<IEnumerable<SaucyEvent<TAggregateId>>> ReadEvents<TAggregateId>(TAggregateId id)
         {
             try
             {
@@ -39,48 +36,40 @@ namespace EventSauce.Postgre
 
                 await using var command = new NpgsqlCommand(sql, _connection);
 
-                command.Parameters.AddWithValue("aggregate_id", id.Id);
-                command.Parameters.AddWithValue("aggregate_id_type", id.IdType);
+                command.Parameters.AddWithValue("aggregate_id", id);
+                command.Parameters.AddWithValue("aggregate_id_type", id.GetType().Name);
 
                 await using var reader = await command.ExecuteReaderAsync();
 
                 var result = new List<SaucyEvent<TAggregateId>>();
 
-                TAggregateId? aggregate = null;
+                TAggregateId? aggregate = default;
 
                 var eventTypeIndex = reader.GetOrdinal("EventType");
                 var eventDataIndex = reader.GetOrdinal("EventData");
-                var eventIdIndex = reader.GetOrdinal("EventId");
                 var createdIndex = reader.GetOrdinal("Created");
                 var aggregateVersionIndex = reader.GetOrdinal("AggregateVersion");
-                var aggregateIdIndex = reader.GetOrdinal("AggregateId");
-                var aggregateIdTypeNameIndex = reader.GetOrdinal("AggregateIdType");
 
                 while (reader.Read())
                 {
                     var eventTypeName = reader.GetSaucyString(eventTypeIndex);
                     var eventData = reader.GetSaucyString(eventDataIndex);
-                    var eventId = reader.GetSaucyGuid(eventIdIndex);
                     var created = reader.GetSaucyDate(createdIndex);
                     var aggregateVersion = reader.GetSaucyLong(aggregateVersionIndex);
 
                     var eventType = _eventTypes[eventTypeName];
 
-                    if (aggregate == null)
+                    if (eventType.IsGenericType)
                     {
-                        var aggregateId = reader.GetSaucyGuid(aggregateIdIndex);
-                        var aggregateIdTypeName = reader.GetSaucyString(aggregateIdTypeNameIndex);
-                        var aggregateIdType = _aggregateTypes[aggregateIdTypeName];
-                        aggregate = (TAggregateId) Activator.CreateInstance(aggregateIdType, aggregateId)!;
+                        eventType = eventType.MakeGenericType(typeof(TAggregateId));
                     }
 
-                    var sourceEvent = (SaucyEvent<TAggregateId>) JsonSerializer.Deserialize(eventData, eventType, _options)!;
+                    var sourceEvent = (SaucyEvent<TAggregateId>)JsonSerializer.Deserialize(eventData, eventType, _options)!;
 
                     result.Add(sourceEvent with
                     {
                         AggregateVersion = aggregateVersion,
-                        AggregateId = aggregate,
-                        Id = eventId,
+                        AggregateId = id,
                         Created = created
                     });
                 }
@@ -93,7 +82,7 @@ namespace EventSauce.Postgre
             }
         }
 
-        public async Task AppendEvent<TAggregateId>(SaucyEvent<TAggregateId> sourceEvent, SaucyAggregateId? performedBy) where TAggregateId : SaucyAggregateId
+        public async Task AppendEvent<TAggregateId>(SaucyEvent<TAggregateId> sourceEvent, object? performedBy)
         {
             try
             {
@@ -105,14 +94,14 @@ namespace EventSauce.Postgre
 
                 await using var command = new NpgsqlCommand(sql, _connection);
 
-                command.Parameters.AddWithValue("aggregate_id", sourceEvent.AggregateId?.Id ?? throw new ArgumentNullException(nameof(sourceEvent.AggregateId)));
-                command.Parameters.AddWithValue("aggregate_id_type", sourceEvent.AggregateId?.IdType ?? throw new ArgumentNullException(nameof(sourceEvent.AggregateId)));
+                command.Parameters.AddWithValue("aggregate_id", sourceEvent.AggregateId);
+                command.Parameters.AddWithValue("aggregate_id_type", typeof(TAggregateId).Name);
                 command.Parameters.AddWithValue("aggregate_version", sourceEvent.AggregateVersion);
                 command.Parameters.AddWithValue("created", sourceEvent.Created);
-                command.Parameters.AddWithValue("event_id", sourceEvent.Id);
+                command.Parameters.AddWithValue("event_id", Guid.NewGuid());
                 command.Parameters.AddWithValue("event_type", eventType);
                 command.Parameters.AddWithValue("event_data", NpgsqlDbType.Jsonb, eventData);
-                command.Parameters.AddWithValue("performed_by", performedBy?.Id ?? Guid.Empty);
+                command.Parameters.AddWithValue("performed_by", performedBy ?? Guid.Empty);
 
                 await command.ExecuteNonQueryAsync();
             }

@@ -8,12 +8,10 @@ namespace EventSauce
     public interface ISaucyRepository
     {
         Task<TAggregate?> GetById<TAggregate, TAggregateId>(TAggregateId id, CancellationToken cancellationToken = default)
-            where TAggregate : SaucyAggregate<TAggregateId>
-            where TAggregateId : SaucyAggregateId;
+            where TAggregate : SaucyAggregate<TAggregateId>;
 
-        Task Save<TAggregate, TAggregateId>(TAggregate aggregate, SaucyAggregateId? performedBy = null, CancellationToken cancellationToken = default)
-            where TAggregate : SaucyAggregate<TAggregateId>
-            where TAggregateId : SaucyAggregateId;
+        Task Save<TAggregate, TAggregateId>(TAggregate aggregate, object? performedBy = null, CancellationToken cancellationToken = default)
+            where TAggregate : SaucyAggregate<TAggregateId>;
     }
 
     public class SaucyRepository : ISaucyRepository
@@ -31,11 +29,12 @@ namespace EventSauce
 
         public async Task<TAggregate?> GetById<TAggregate, TAggregateId>(TAggregateId id, CancellationToken cancellationToken = default)
             where TAggregate : SaucyAggregate<TAggregateId>
-            where TAggregateId : SaucyAggregateId
         {
             try
             {
                 var aggregate = CreateEmptyAggregate<TAggregate>();
+
+                aggregate.Id = id;
 
                 foreach (var domainEvent in await _sauceStore.ReadEvents(id))
                 {
@@ -54,9 +53,8 @@ namespace EventSauce
             }
         }
 
-        public async Task Save<TAggregate, TAggregateId>(TAggregate aggregate, SaucyAggregateId? performedBy = null, CancellationToken cancellationToken = default)
+        public async Task Save<TAggregate, TAggregateId>(TAggregate aggregate, object? performedBy = null, CancellationToken cancellationToken = default)
             where TAggregate : SaucyAggregate<TAggregateId>
-            where TAggregateId : SaucyAggregateId
         {
             try
             {

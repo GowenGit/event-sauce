@@ -66,12 +66,12 @@ namespace EventSauce.Tests.Integration
         [Fact]
         public async Task Aggregate_WhenCreatedAndSaved_ShouldHaveNoUncommittedEvents()
         {
-            var userId = User.NewUser();
+            var userId = Guid.NewGuid();
 
             const string? email = "origina@gmail.com";
             const string? auth = "auth_id";
 
-            var user = new UserAggregate(userId, email, auth);
+            var user = new UserAggregate<Guid>(userId, email, auth);
 
             const string newEmail = "changed@gmail.com";
 
@@ -79,7 +79,7 @@ namespace EventSauce.Tests.Integration
 
             var sut = _fixture.GetSutObject();
 
-            await sut.Save<UserAggregate, User>(user);
+            await sut.Save<UserAggregate<Guid>, Guid>(user);
 
             var events = user.GetUncommittedEvents().ToList();
 
@@ -93,39 +93,39 @@ namespace EventSauce.Tests.Integration
         [Fact]
         public async Task Aggregate_WhenCreatedAndSaved_ShouldRetrieve()
         {
-            var userId = User.NewUser();
+            var userId = Guid.NewGuid();
 
             const string? email = "origina@gmail.com";
             const string? auth = "auth_id";
 
-            var user = new UserAggregate(userId, email, auth);
+            var user = new UserAggregate<Guid>(userId, email, auth);
 
             var sut = _fixture.GetSutObject();
 
-            var repoUser = await sut.GetById<UserAggregate, User>(userId);
+            var repoUser = await sut.GetById<UserAggregate<Guid>, Guid>(userId);
 
             Assert.Null(repoUser);
 
-            await sut.Save<UserAggregate, User>(user);
+            await sut.Save<UserAggregate<Guid>, Guid>(user);
 
-            repoUser = await sut.GetById<UserAggregate, User>(userId);
+            repoUser = await sut.GetById<UserAggregate<Guid>, Guid>(userId);
 
             Assert.NotNull(repoUser);
 
-            Assert.Equal(userId, repoUser?.Id);
-            Assert.Equal(email, repoUser?.Email);
-            Assert.Equal(0, repoUser?.Version);
+            Assert.Equal(userId, repoUser.Id);
+            Assert.Equal(email, repoUser.Email);
+            Assert.Equal(0, repoUser.Version);
         }
 
         [Fact]
         public async Task Aggregate_WhenCreatedChangedAndSaved_ShouldRetrieve()
         {
-            var userId = User.NewUser();
+            var userId = Guid.NewGuid();
 
             const string? email = "origina@gmail.com";
             const string? auth = "auth_id";
 
-            var user = new UserAggregate(userId, email, auth);
+            var user = new UserAggregate<Guid>(userId, email, auth);
 
             const string newEmail = "changed@gmail.com";
 
@@ -133,30 +133,30 @@ namespace EventSauce.Tests.Integration
 
             var sut = _fixture.GetSutObject();
 
-            var repoUser = await sut.GetById<UserAggregate, User>(userId);
+            var repoUser = await sut.GetById<UserAggregate<Guid>, Guid>(userId);
 
             Assert.Null(repoUser);
 
-            await sut.Save<UserAggregate, User>(user);
+            await sut.Save<UserAggregate<Guid>, Guid>(user);
 
-            repoUser = await sut.GetById<UserAggregate, User>(userId);
+            repoUser = await sut.GetById<UserAggregate<Guid>, Guid>(userId);
 
             Assert.NotNull(repoUser);
 
-            Assert.Equal(userId, repoUser?.Id);
-            Assert.Equal(newEmail, repoUser?.Email);
-            Assert.Equal(1, repoUser?.Version);
+            Assert.Equal(userId, repoUser.Id);
+            Assert.Equal(newEmail, repoUser.Email);
+            Assert.Equal(1, repoUser.Version);
         }
 
         [Fact]
         public async Task Aggregate_WhenCreatedChangedAndSavedWithPerformedBy_ShouldRetrieve()
         {
-            var userId = User.NewUser();
+            var userId = Guid.NewGuid();
 
             const string? email = "origina@gmail.com";
             const string? auth = "auth_id";
 
-            var user = new UserAggregate(userId, email, auth);
+            var user = new UserAggregate<Guid>(userId, email, auth);
 
             const string newEmail = "changed@gmail.com";
 
@@ -164,30 +164,30 @@ namespace EventSauce.Tests.Integration
 
             var sut = _fixture.GetSutObject();
 
-            var repoUser = await sut.GetById<UserAggregate, User>(userId);
+            var repoUser = await sut.GetById<UserAggregate<Guid>, Guid>(userId);
 
             Assert.Null(repoUser);
 
-            await sut.Save<UserAggregate, User>(user, userId);
+            await sut.Save<UserAggregate<Guid>, Guid>(user, userId);
 
-            repoUser = await sut.GetById<UserAggregate, User>(userId);
+            repoUser = await sut.GetById<UserAggregate<Guid>, Guid>(userId);
 
             Assert.NotNull(repoUser);
 
-            Assert.Equal(userId, repoUser?.Id);
-            Assert.Equal(newEmail, repoUser?.Email);
-            Assert.Equal(1, repoUser?.Version);
+            Assert.Equal(userId, repoUser.Id);
+            Assert.Equal(newEmail, repoUser.Email);
+            Assert.Equal(1, repoUser.Version);
         }
 
         [Fact]
         public async Task Aggregate_WhenCreatedChangedThenChangedToInvalidAndSavedWithPerformedBy_ShouldRetrieve()
         {
-            var userId = User.NewUser();
+            var userId = Guid.NewGuid();
 
             const string? email = "origina@gmail.com";
             const string? auth = "auth_id";
 
-            var user = new UserAggregate(userId, email, auth);
+            var user = new UserAggregate<Guid>(userId, email, auth);
 
             const string newEmail = "changed@gmail.com";
             const string invalidEmail = "faker_email";
@@ -197,19 +197,19 @@ namespace EventSauce.Tests.Integration
 
             var sut = _fixture.GetSutObject();
 
-            var repoUser = await sut.GetById<UserAggregate, User>(userId);
+            var repoUser = await sut.GetById<UserAggregate<Guid>, Guid>(userId);
 
             Assert.Null(repoUser);
 
-            await sut.Save<UserAggregate, User>(user, userId);
+            await sut.Save<UserAggregate<Guid>, Guid>(user, userId);
 
-            repoUser = await sut.GetById<UserAggregate, User>(userId);
+            repoUser = await sut.GetById<UserAggregate<Guid>, Guid>(userId);
 
             Assert.NotNull(repoUser);
 
-            Assert.Equal(userId, repoUser?.Id);
-            Assert.Equal(invalidEmail, repoUser?.Email);
-            Assert.Equal(2, repoUser?.Version);
+            Assert.Equal(userId, repoUser.Id);
+            Assert.Equal(invalidEmail, repoUser.Email);
+            Assert.Equal(2, repoUser.Version);
         }
     }
 }
