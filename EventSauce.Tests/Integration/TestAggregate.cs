@@ -73,6 +73,37 @@ namespace EventSauce.Tests.Integration
         public bool IsValid { get; init; } = false;
     }
 
+    public interface IDoesNothing {}
+
+    public abstract record CustomMongoEvent<T> : SaucyEvent<T>, IDoesNothing { }
+
+    public record CreateCustomMongoUserEvent : CustomMongoEvent<User>
+    {
+        public string Email { get; init; } = string.Empty;
+    }
+
+    public class CustomMongoUserAggregate : SaucyAggregate<User>
+    {
+        private CustomMongoUserAggregate() { }
+
+        public string Email { get; private set; } = string.Empty;
+
+        public CustomMongoUserAggregate(User id, string email)
+        {
+            Id = id;
+
+            IssueEvent(new CreateCustomMongoUserEvent
+            {
+                Email = email,
+            });
+        }
+
+        public void Apply(CreateCustomMongoUserEvent domainEvent)
+        {
+            Email = domainEvent.Email;
+        }
+    }
+
     public record User(ObjectId Value)
     {
         public static User New() => new(ObjectId.GenerateNewId());

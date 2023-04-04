@@ -210,5 +210,31 @@ namespace EventSauce.Tests.Integration
             Assert.Equal(invalidEmail, repoUser.Email);
             Assert.Equal(2, repoUser.Version);
         }
+
+        [Fact]
+        public async Task Aggregate_WhenInteractingWithCustomMongoAggregate_ShouldSucceed()
+        {
+            var userId = User.New();
+
+            const string? email = "origina@gmail.com";
+
+            var user = new CustomMongoUserAggregate(userId, email);
+
+            var sut = _fixture.GetSutObject();
+
+            var repoUser = await sut.GetById<CustomMongoUserAggregate, User>(userId);
+
+            Assert.Null(repoUser);
+
+            await sut.Save<CustomMongoUserAggregate, User>(user, userId);
+
+            repoUser = await sut.GetById<CustomMongoUserAggregate, User>(userId);
+
+            Assert.NotNull(repoUser);
+
+            Assert.Equal(userId, repoUser.Id);
+            Assert.Equal(email, repoUser.Email);
+            Assert.Equal(0, repoUser.Version);
+        }
     }
 }
