@@ -46,7 +46,14 @@ namespace EventSauce.MongoDB
         {
             try
             {
+                var pack = new ConventionPack
+                {
+                    new IgnoreExtraElementsConvention(true)
+                };
+
                 var genericEventType = typeof(SaucyEvent<>);
+
+                ConventionRegistry.Register("Sauce Conventions", pack, type => IsSubclassOfRawGeneric(genericEventType, type));
 
                 foreach (var assembly in _assemblies)
                 {
@@ -54,23 +61,16 @@ namespace EventSauce.MongoDB
                     {
                         if (IsSubclassOfRawGeneric(genericEventType, type))
                         {
-                            var map = new BsonClassMap(type);
-
                             // Do magic to resolve polymorphism
+                            var map = new BsonClassMap(type);
                             map.AutoMap();
-                            map.SetIgnoreExtraElements(true);
-
                             BsonClassMap.RegisterClassMap(map);
                         }
                     }
                 }
 
                 var genericMap = new BsonClassMap(genericEventType);
-
                 genericMap.AutoMap();
-                genericMap.SetIgnoreExtraElements(true);
-                genericMap.SetIsRootClass(true);
-
                 BsonClassMap.RegisterClassMap(genericMap);
             }
             catch (Exception ex)
