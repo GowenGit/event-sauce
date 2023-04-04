@@ -1,33 +1,40 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
+using System.Reflection;
+using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 
 namespace EventSauce.MongoDB
 {
     public class MongoDBSauceStoreFactory
     {
+        private readonly Assembly[] _assemblies;
         private readonly MongoClientSettings _clientSettings;
         private readonly string _database;
         private readonly string _collection;
 
         public MongoDBSauceStoreFactory(
+            Assembly[] assemblies,
             string connectionString,
-            string database) : this(MongoClientSettings.FromConnectionString(connectionString), database, "events")
+            string database) : this(assemblies, MongoClientSettings.FromConnectionString(connectionString), database, "events")
         {
         }
 
         public MongoDBSauceStoreFactory(
+            Assembly[] assemblies,
             MongoClientSettings clientSettings,
-            string database) : this(clientSettings, database, "events")
+            string database) : this(assemblies, clientSettings, database, "events")
         {
         }
 
         public MongoDBSauceStoreFactory(
+            Assembly[] assemblies,
             MongoClientSettings clientSettings,
             string database,
             string collection)
         {
+            _assemblies = assemblies;
             _clientSettings = clientSettings;
             _database = database;
             _collection = collection;
@@ -39,14 +46,32 @@ namespace EventSauce.MongoDB
         {
             try
             {
-                var pack = new ConventionPack
-                {
-                    new IgnoreExtraElementsConvention(true)
-                };
-
                 var genericEventType = typeof(SaucyEvent<>);
 
-                ConventionRegistry.Register("Sauce Conventions", pack, type => IsSubclassOfRawGeneric(genericEventType, type));
+                foreach (var assembly in _assemblies)
+                {
+                    foreach (var type in assembly.GetTypes())
+                    {
+                        if (IsSubclassOfRawGeneric(genericEventType, type))
+                        {
+                            var map = new BsonClassMap(type);
+
+                            // Do magic to resolve polymorphism
+                            map.AutoMap();
+                            map.SetIgnoreExtraElements(true);
+
+                            BsonClassMap.RegisterClassMap(map);
+                        }
+                    }
+                }
+
+                var genericMap = new BsonClassMap(genericEventType);
+
+                genericMap.AutoMap();
+                genericMap.SetIgnoreExtraElements(true);
+                genericMap.SetIsRootClass(true);
+
+                BsonClassMap.RegisterClassMap(genericMap);
             }
             catch (Exception ex)
             {

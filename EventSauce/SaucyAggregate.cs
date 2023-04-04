@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
-[assembly: InternalsVisibleTo("EventSauce.Tests")]
 
 namespace EventSauce
 {
@@ -32,7 +30,7 @@ namespace EventSauce
             _uncommittedEvents.Clear();
         }
 
-        internal IEnumerable<SaucyEvent<TAggregateId>> GetUncommittedEvents()
+        public IEnumerable<SaucyEvent<TAggregateId>> GetUncommittedEvents()
         {
             return _uncommittedEvents.AsEnumerable();
         }
@@ -59,8 +57,6 @@ namespace EventSauce
 
     public abstract record SaucyEvent<TAggregateId>
     {
-        [JsonIgnore] private string IdType => GetType().Name;
-
         [JsonIgnore] public DateTime Created { get; init; } = DateTime.UtcNow;
 
         [JsonIgnore] public TAggregateId? AggregateId { get; init; }
@@ -69,7 +65,7 @@ namespace EventSauce
 
         public override string ToString()
         {
-            return $"[{IdType}|Aggregate: {AggregateId}|Version: {AggregateVersion}]";
+            return $"[{GetType().Name}|Aggregate: {AggregateId}|Version: {AggregateVersion}]";
         }
     }
 }

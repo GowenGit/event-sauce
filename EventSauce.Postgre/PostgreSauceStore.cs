@@ -43,8 +43,6 @@ namespace EventSauce.Postgre
 
                 var result = new List<SaucyEvent<TAggregateId>>();
 
-                TAggregateId? aggregate = default;
-
                 var eventTypeIndex = reader.GetOrdinal("EventType");
                 var eventDataIndex = reader.GetOrdinal("EventData");
                 var createdIndex = reader.GetOrdinal("Created");

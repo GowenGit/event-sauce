@@ -29,6 +29,10 @@ namespace EventSauce.Tests.Integration
             services.AddEventSauce(options =>
             {
                 var factory = new MongoDBSauceStoreFactory(
+                    new[]
+                    {
+                        typeof(MongoDBTests).Assembly
+                    },
                     connectionString,
                     "sauce");
 
